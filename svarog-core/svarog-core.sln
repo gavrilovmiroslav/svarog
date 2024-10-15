@@ -1,0 +1,55 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.11.35312.102
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "svarog-core", "svarog-core.csproj", "{22DCB6FD-AED1-4F6D-80CF-4401BFFB8732}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "framerate-plugin", "..\framerate-plugin\framerate-plugin.csproj", "{F219F214-1ABB-45A8-B741-1DC90A8E93A8}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "svarog-exe", "..\svarog-exe\svarog-exe.csproj", "{9B4CC158-F8EE-459D-A410-7F0C23ACBBF0}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "oldschool-plugin", "..\oldschool-plugin\oldschool-plugin.csproj", "{B8C5F808-5C43-4836-A4F0-DA8F98E80C6F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "plugin-template", "..\plugin-template\plugin-template.csproj", "{3CAF0FB0-4F7C-46DE-A644-5257C6CFAB38}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "render-test-plugin", "..\render-test-plugin\render-test-plugin.csproj", "{F02CC0AE-8DE3-4C74-805D-A9D28C770C47}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{22DCB6FD-AED1-4F6D-80CF-4401BFFB8732}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{22DCB6FD-AED1-4F6D-80CF-4401BFFB8732}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{22DCB6FD-AED1-4F6D-80CF-4401BFFB8732}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{22DCB6FD-AED1-4F6D-80CF-4401BFFB8732}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F219F214-1ABB-45A8-B741-1DC90A8E93A8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F219F214-1ABB-45A8-B741-1DC90A8E93A8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F219F214-1ABB-45A8-B741-1DC90A8E93A8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F219F214-1ABB-45A8-B741-1DC90A8E93A8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9B4CC158-F8EE-459D-A410-7F0C23ACBBF0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9B4CC158-F8EE-459D-A410-7F0C23ACBBF0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9B4CC158-F8EE-459D-A410-7F0C23ACBBF0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9B4CC158-F8EE-459D-A410-7F0C23ACBBF0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B8C5F808-5C43-4836-A4F0-DA8F98E80C6F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B8C5F808-5C43-4836-A4F0-DA8F98E80C6F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B8C5F808-5C43-4836-A4F0-DA8F98E80C6F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B8C5F808-5C43-4836-A4F0-DA8F98E80C6F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3CAF0FB0-4F7C-46DE-A644-5257C6CFAB38}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3CAF0FB0-4F7C-46DE-A644-5257C6CFAB38}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3CAF0FB0-4F7C-46DE-A644-5257C6CFAB38}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3CAF0FB0-4F7C-46DE-A644-5257C6CFAB38}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F02CC0AE-8DE3-4C74-805D-A9D28C770C47}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F02CC0AE-8DE3-4C74-805D-A9D28C770C47}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F02CC0AE-8DE3-4C74-805D-A9D28C770C47}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F02CC0AE-8DE3-4C74-805D-A9D28C770C47}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {0308ED64-FF97-41DB-8539-31A4F75375A1}
+	EndGlobalSection
+EndGlobal
