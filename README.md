@@ -16,6 +16,8 @@ Svarog is modular: every piece of functionality is loaded as a separate DLL and 
 
 Svarog has a plugin template that makes it very easy to setup a new plugin! Install it by copying the `Svarog Engine Plugin.zip` file from the root of the repo to [where your VS templates are](https://learn.microsoft.com/en-us/visualstudio/ide/how-to-locate-and-organize-project-and-item-templates?view=vs-2022). After that, choose to make a new project in the `svarog` solution, and search for "Svarog". It should pop!
 
+The playable version of the game lives in the `svarog-game` folder: it is a product of all the projects and needed a home of its own. The `run.bat` script just goes in and starts it from there.
+
 ## Plugin 101s
 
 For a plugin to be recognized by the engine, it needs to satisfy two simple conditions:
@@ -34,3 +36,5 @@ Plugin lifetimes are straightforward:
 4. `Unload` - called once either at engine shutdown or when the plugin is unloaded
 
 Plugin reloads are simply `Unload+Load` cycles with no complications.
+
+Each plugin can carry its own `Data`: make sure that the data is made to "Always Copy" on build. The build process will copy and unify the data with the one already present in the `svarog-game` folder.
