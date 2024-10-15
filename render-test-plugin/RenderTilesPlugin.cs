@@ -20,10 +20,13 @@ namespace svarog.Plugins
                     p.X = i * 32;
                     p.Y = j * 32;
                     sprite.Position = p;
-                    var s = svarog.resources.Sprites[c % 2 == 0 ? "Blank_floor" : "Inner_wall"];
-                    sprite.Texture = s.Item1;
-                    sprite.TextureRect = s.Item2;
-                    svarog.render?.Draw(sprite);
+                    var s = svarog.resources.GetSprite(c % 2 == 0 ? "Blank_floor" : "Inner_wall");
+                    if (s.HasValue)
+                    {
+                        sprite.Texture = s.Value.Item1;
+                        sprite.TextureRect = s.Value.Item2;
+                        svarog.render?.Draw(sprite);
+                    }
                     c++;
                 }
             }

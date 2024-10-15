@@ -9,6 +9,14 @@ namespace svarog_core
         public Dictionary<string, Texture> Textures = new();
         public Dictionary<string, (Texture, IntRect)> Sprites = new();
         public MultiMap<string, string> NamedSprites = new();
+
+        public (Texture, IntRect)? GetSprite(string name)
+        {
+            if (Sprites.TryGetValue(name, out var sprite)) 
+                return sprite;
+            else 
+                return null;
+        }
     }
 
     public class Svarog

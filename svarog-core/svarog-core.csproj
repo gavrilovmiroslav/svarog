@@ -15,10 +15,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Plugins\" />
-  </ItemGroup>
-
-  <ItemGroup>
     <None Update="Newtonsoft.Json.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

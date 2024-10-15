@@ -3,7 +3,7 @@ using svarog_core;
 
 namespace svarog.Plugins
 {
-    //[Plugin(Priority = 101)]
+    [Plugin(Priority = 101)]
     public class RenderUnitPlugin : Plugin
     {
         public override void Render(Svarog svarog)
