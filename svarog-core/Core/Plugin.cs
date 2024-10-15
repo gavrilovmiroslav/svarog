@@ -4,6 +4,8 @@ using System.Reflection;
 
 namespace svarog_core
 {
+    public record RPlugin(string Name, Action<Svarog> Act, int Priority);
+
     public interface IPlugin
     {
         void Load(Svarog instance);
@@ -18,12 +20,13 @@ namespace svarog_core
         public virtual void Render(Svarog instance) { }
         public virtual void Frame(Svarog instance) { }
         public virtual void Unload(Svarog instance) { }
+
         public void Stop()
         {
-            Game.OnLoad -= Load;
-            Game.OnRender -= Render;
-            Game.OnFrame -= Frame;
-            Game.OnUnload -= Unload;
+            Game.OnLoad.RemoveInvocation(Load);
+            Game.OnRender.RemoveInvocation(Render);
+            Game.OnFrame.RemoveInvocation(Frame);
+            Game.OnUnload.RemoveInvocation(Unload);
         }
     }
 

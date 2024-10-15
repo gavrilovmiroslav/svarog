@@ -5,24 +5,24 @@ namespace svarog_core
 {
     public class Game
     {
-        internal static event Action<Svarog>? OnLoad;
-        internal static event Action<Svarog>? OnRender;
-        internal static event Action<Svarog>? OnFrame;
-        internal static event Action<Svarog>? OnUnload;
-
+        internal static List<RPlugin> OnLoad = [];
+        internal static List<RPlugin> OnRender = [];
+        internal static List<RPlugin> OnFrame = [];
+        internal static List<RPlugin> OnUnload = [];
+        
         public static void Start()
         {
             var svarog = new Svarog
             {
                 window = new RenderWindow(new VideoMode(1280, 800), "Svarog"),
-                render = new RenderTexture(1280, 800)
+                render = new RenderTexture(1280, 800),
             };
 
             svarog.window.KeyPressed += Window_KeyPressed;
             svarog.window.Closed += (window, _) => ((RenderWindow?)window)?.Close();
-            svarog.window.SetFramerateLimit(120);
+            svarog.window.SetFramerateLimit(120); // TODO: move to config
 
-            OnLoad?.Invoke(svarog);
+            OnLoad.Invoke(svarog);
             Sprite screen = new();
 
             while (svarog.window.IsOpen)
@@ -35,7 +35,7 @@ namespace svarog_core
                     svarog.window.Clear(Color.Black);
                     svarog.render.Clear(Color.Black);
 
-                    OnRender?.Invoke(svarog);
+                    OnRender.Invoke(svarog);
                 }
 
                 svarog.render.Display();
@@ -43,8 +43,14 @@ namespace svarog_core
                 svarog.window.Draw(screen);
                 svarog.window.Display();
 
-                OnFrame?.Invoke(svarog);
+                OnFrame.Invoke(svarog);
                 Thread.Yield();
+
+                svarog.frame++;
+                if (svarog.frame % 60 == 0) // TODO: move to config
+                {
+                    svarog.externalPlugins.Update();
+                }
             }
         }
 

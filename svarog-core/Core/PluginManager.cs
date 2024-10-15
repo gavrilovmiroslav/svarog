@@ -39,28 +39,29 @@ namespace svarog_core
                 }
 
                 var instance = Activator.CreateInstance(t);
+                var priority = t.GetCustomAttribute<PluginAttribute>()?.Priority ?? 100;
                 if (instance is IPlugin p)
                 {
                     Plugins.Add(t, p);
 
                     if (IsOverriding(t, "Load"))
                     {
-                        Game.OnLoad += p.Load;
+                        Game.OnLoad.AddInvocation(new RPlugin(t.Name, p.Load, priority));
                     }
 
                     if (IsOverriding(t, "Render"))
                     {
-                        Game.OnRender += p.Render;
+                        Game.OnRender.AddInvocation(new RPlugin(t.Name, p.Render, priority));
                     }
 
                     if (IsOverriding(t, "Frame"))
                     {
-                        Game.OnFrame += p.Frame;
+                        Game.OnFrame.AddInvocation(new RPlugin(t.Name, p.Frame, priority));
                     }
 
                     if (IsOverriding(t, "Unload"))
                     {
-                        Game.OnUnload += p.Unload;
+                        Game.OnUnload.AddInvocation(new RPlugin(t.Name, p.Unload, priority));
                     }
                 }
             }

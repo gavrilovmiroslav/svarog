@@ -19,6 +19,7 @@ namespace svarog_core
         public ExternalPluginManager externalPlugins;
         public RenderWindow? window;
         public RenderTexture? render;
+        public long frame;
 
         public Svarog()
         {
@@ -26,6 +27,7 @@ namespace svarog_core
             resources = new Resources();
             plugins = new PluginManager();
             externalPlugins = new ExternalPluginManager(this);
+            frame = 0;
         }
     }
 }

@@ -5,16 +5,14 @@ namespace svarog_core
 {
     public class ExternalPluginManager
     {
-        FileSystemWatcher watcher;
-        System.Timers.Timer timer;
-        HashSet<string> waiting = new HashSet<string>();
+        private readonly Svarog svarog;
+        private readonly HashSet<string> waiting = [];
+        private readonly Dictionary<string, int> dllHashes = [];
+        private readonly MultiMap<string, IPlugin> loadedTypes = new();
+
+        private FileSystemWatcher watcher;
 
         public bool IsReady => waiting.Count == 0;
-
-        MultiMap<string, IPlugin> loadedTypes = new();
-
-        private bool importInProgress = false;
-        private Svarog svarog;
 
         public ExternalPluginManager(Svarog svarog)
         {
@@ -27,7 +25,6 @@ namespace svarog_core
             watcher.NotifyFilter = NotifyFilters.CreationTime | NotifyFilters.Size;
             watcher.Changed += Watcher_OnChanged;
             watcher.Created += Watcher_OnCreated;
-            Console.WriteLine("Watching " + path);
 
             foreach (var file in Directory.EnumerateFiles("Data//Plugins"))
             {
@@ -37,22 +34,24 @@ namespace svarog_core
                 }
             }
 
-            timer = new System.Timers.Timer(500);
-            timer.Elapsed += Timer_OnImportWaiting;
-            timer.AutoReset = true;
-            timer.Start();
+            Update();
         }
 
-        private void Timer_OnImportWaiting(object? sender, System.Timers.ElapsedEventArgs e)
-        {
-            if (importInProgress) return;
-            importInProgress = true;
-            
+        internal void Update()
+        {            
             if (waiting.Count > 0)
             {
                 foreach (var item in waiting)
                 {
                     byte[] dll = File.ReadAllBytes(item);
+                    var hash = dll.GetHashCode();
+                    if (dllHashes.TryGetValue(item, out int value) && value == hash)
+                    {
+                        continue;
+                    }
+
+                    dllHashes[item] = hash;
+
                     var assembly = Assembly.Load(dll);
 
                     Type type = typeof(IPlugin);
@@ -64,29 +63,35 @@ namespace svarog_core
                     {
                         foreach (Type t in types)
                         {
+                            List<IPlugin> toRemove = [];
                             foreach (var old in loadedTypes[item])
                             {
                                 if (PluginManager.IsOverriding(t, "Unload"))
                                 {
-                                    Game.OnUnload -= old.Unload;
+                                    Game.OnUnload.RemoveInvocation(old.Unload);
                                     old.Unload(svarog);
                                 }
 
                                 if (PluginManager.IsOverriding(t, "Load"))
                                 {
-                                    Game.OnLoad -= old.Load;
+                                    Game.OnLoad.RemoveInvocation(old.Load);
                                 }
 
                                 if (PluginManager.IsOverriding(t, "Render"))
                                 {
-                                    Game.OnRender -= old.Render;
+                                    Game.OnRender.RemoveInvocation(old.Render);
                                 }
 
                                 if (PluginManager.IsOverriding(t, "Frame"))
                                 {
-                                    Game.OnFrame -= old.Frame;
+                                    Game.OnFrame.RemoveInvocation(old.Frame);
                                 }
 
+                                toRemove.Add(old);
+                            }
+
+                            foreach (var old in toRemove)
+                            {
                                 loadedTypes.Remove(item, old);
                             }
                         }
@@ -101,6 +106,7 @@ namespace svarog_core
 
                         Console.WriteLine($"Checking imports for {item}: {loadedTypes[item].Count} found.");
 
+                        var priority = t.GetCustomAttribute<PluginAttribute>()?.Priority ?? 100;
                         var instance = Activator.CreateInstance(t);
                         if (instance is IPlugin p)
                         {
@@ -109,22 +115,22 @@ namespace svarog_core
 
                             if (PluginManager.IsOverriding(t, "Render"))
                             {
-                                Game.OnRender += p.Render;
+                                Game.OnRender.AddInvocation(new RPlugin(t.Name, p.Render, priority));
                             }
 
                             if (PluginManager.IsOverriding(t, "Frame"))
                             {
-                                Game.OnFrame += p.Frame;
+                                Game.OnFrame.AddInvocation(new RPlugin(t.Name, p.Frame, priority));
                             }
 
                             if (PluginManager.IsOverriding(t, "Unload"))
                             {
-                                Game.OnUnload += p.Unload;
+                                Game.OnUnload.AddInvocation(new RPlugin(t.Name, p.Unload, priority));
                             }
 
                             if (PluginManager.IsOverriding(t, "Load"))
                             {
-                                Game.OnLoad += p.Load;
+                                Game.OnLoad.AddInvocation(new RPlugin(t.Name, p.Load, priority));
                                 p.Load(svarog);
                             }
                         }
@@ -133,8 +139,6 @@ namespace svarog_core
 
                 waiting.Clear();
             }
-
-            importInProgress = false;
         }
 
         private void Watcher_OnCreated(object sender, FileSystemEventArgs e)

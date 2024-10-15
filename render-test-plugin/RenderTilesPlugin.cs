@@ -3,7 +3,7 @@ using svarog_core;
 
 namespace svarog.Plugins
 {
-    [Plugin]
+    [Plugin(Priority = 100)]
     public class RenderTilesPlugin : Plugin
     {
         public override void Render(Svarog svarog)
