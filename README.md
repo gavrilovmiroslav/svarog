@@ -42,5 +42,7 @@ Each plugin can carry its own `Data`: make sure that the data is made to "Always
 ## Gotchas
 
 When working with resources, make every plugin responsible for the data it brings in. Don't put all the resources in the `svarog-bin` data folder.
+
 Don't make generic or smart loaders - make plugins to load the exact data you need if you don't need anything better than that.
+
 Keep data unattached from the runtime (don't load a whole file and leave it open), so that it can be reloaded properly. This means using `File.ReadAllBytes` or `File.ReadAllText`, for example, instead of opening files.
