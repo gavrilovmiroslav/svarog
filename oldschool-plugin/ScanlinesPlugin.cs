@@ -1,5 +1,5 @@
 ﻿using svarog.Effects;
-using svarog_core;
+using svarog;
 
 namespace svarog.Plugins
 {

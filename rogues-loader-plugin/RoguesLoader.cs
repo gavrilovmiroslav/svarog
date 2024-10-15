@@ -1,5 +1,5 @@
 ﻿using SFML.Graphics;
-using svarog_core;
+using svarog;
 using System.Text.RegularExpressions;
 
 namespace svarog.Plugins

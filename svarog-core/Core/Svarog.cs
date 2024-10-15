@@ -1,8 +1,8 @@
 ﻿using SFML.Graphics;
 using SFML.System;
-using svarog_core.Structures;
+using svarog.Structures;
 
-namespace svarog_core
+namespace svarog
 {
     public class Resources
     {

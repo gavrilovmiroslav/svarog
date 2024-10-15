@@ -1,8 +1,8 @@
-﻿using svarog_core.Structures;
+﻿using svarog.Structures;
 using System.ComponentModel.DataAnnotations;
 using System.Reflection;
 
-namespace svarog_core
+namespace svarog
 {
     public record RPlugin(string Name, Action<Svarog> Act, int Priority);
 

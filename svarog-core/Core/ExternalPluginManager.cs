@@ -1,7 +1,7 @@
-﻿using svarog_core.Structures;
+﻿using svarog.Structures;
 using System.Reflection;
 
-namespace svarog_core
+namespace svarog
 {
     public class ExternalPluginManager
     {

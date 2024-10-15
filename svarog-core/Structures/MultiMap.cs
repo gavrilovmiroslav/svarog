@@ -1,4 +1,4 @@
-﻿namespace svarog_core.Structures
+﻿namespace svarog.Structures
 {
     public class MultiMap<K, V> where K : notnull
     {

@@ -1,4 +1,4 @@
-﻿using svarog_core;
+﻿using svarog;
 using svarog.Effects;
 
 namespace svarog.Plugins

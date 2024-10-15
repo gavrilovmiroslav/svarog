@@ -1,6 +1,6 @@
 ﻿using System.Reflection;
 
-namespace svarog_core
+namespace svarog
 {
     public class PluginManager
     {

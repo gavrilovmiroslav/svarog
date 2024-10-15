@@ -1,4 +1,4 @@
-﻿using svarog_core;
+﻿using svarog;
 
 namespace svarog_exe
 {

@@ -1,7 +1,7 @@
 ﻿using SFML.Graphics;
 using SFML.Window;
 
-namespace svarog_core
+namespace svarog
 {
     public class Game
     {
