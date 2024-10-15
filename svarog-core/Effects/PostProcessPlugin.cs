@@ -1,5 +1,6 @@
 ﻿using SFML.Graphics;
 using svarog;
+using svarog.Structures;
 
 namespace svarog.Effects
 {
@@ -8,7 +9,7 @@ namespace svarog.Effects
         protected Shader? postprocessShader;
         Sprite? screenSprite;
         RenderTexture? postprocessTexture;
-
+         
         public override void Load(Svarog instance)
         {
             if (!Shader.IsAvailable)
@@ -18,9 +19,11 @@ namespace svarog.Effects
                 return;
             }
 
-            var vert = File.OpenRead($"Data//{name}//{name.ToLower()}.vert");
-            var frag = File.OpenRead($"Data//{name}//{name.ToLower()}.frag");
-            postprocessShader = new Shader(vert, null, frag);
+            var vert = File.ReadAllText($"Data//{name}//{name.ToLower()}.vert");
+            var frag = File.ReadAllText($"Data//{name}//{name.ToLower()}.frag");
+
+            postprocessShader = Shader.FromString(vert, null, frag);
+
             postprocessTexture = new RenderTexture(instance.window?.Size.X ?? 1280, instance.window?.Size.Y ?? 800);
             screenSprite = new()
             {

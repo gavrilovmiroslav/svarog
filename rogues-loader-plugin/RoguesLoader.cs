@@ -19,7 +19,8 @@ namespace svarog.Plugins
     {
         public bool Load(string resource)
         {
-            var texture = new Texture($"Data//32rogues//{resource}.png");
+            var bytes = File.ReadAllBytes($"Data//32rogues//{resource}.png");
+            var texture = new Texture(bytes);
             res.Textures[resource] = texture;
 
             var regex = new Regex("""^(\d+)\.(\w+)\. (.+)$""");

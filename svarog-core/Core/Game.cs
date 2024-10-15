@@ -30,7 +30,7 @@ namespace svarog
                 svarog.clock.Restart();
                 svarog.window.DispatchEvents();
 
-                if (svarog.externalPlugins.IsReady)
+                if (svarog.plugins.IsReady)
                 {
                     svarog.window.Clear(Color.Black);
                     svarog.render.Clear(Color.Black);
@@ -49,7 +49,7 @@ namespace svarog
                 svarog.frame++;
                 if (svarog.frame % 60 == 0) // TODO: move to config
                 {
-                    svarog.externalPlugins.Update();
+                    svarog.plugins.Update();
                 }
             }
         }

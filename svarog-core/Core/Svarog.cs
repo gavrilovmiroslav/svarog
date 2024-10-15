@@ -24,7 +24,6 @@ namespace svarog
         public Clock clock;
         public Resources resources;
         public PluginManager plugins;
-        public ExternalPluginManager externalPlugins;
         public RenderWindow? window;
         public RenderTexture? render;
         public long frame;
@@ -33,8 +32,7 @@ namespace svarog
         {
             clock = new Clock();
             resources = new Resources();
-            plugins = new PluginManager();
-            externalPlugins = new ExternalPluginManager(this);
+            plugins = new PluginManager(this);
             frame = 0;
         }
     }
