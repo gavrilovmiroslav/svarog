@@ -8,7 +8,7 @@
   </PropertyGroup>
 
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <Exec Command="call $(SolutionDir)..\postbuild.bat $(TargetFileName) $(TargetDir) $(SolutionDir)..\svarog-game\$(ConfigurationName)\net8.0\Data" />
+	  <Exec Command="call $(SolutionDir)postbuild.bat $(TargetFileName) $(TargetDir) $(SolutionDir)svarog-game\$(ConfigurationName)\net8.0\Data" />
   </Target>
 
   <ItemGroup>
