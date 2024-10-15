@@ -5,7 +5,7 @@ namespace svarog_core
 {
     public class Game
     {
-        internal static Action<Svarog>? OnLoad;
+        internal static event Action<Svarog>? OnLoad;
         internal static event Action<Svarog>? OnRender;
         internal static event Action<Svarog>? OnFrame;
         internal static event Action<Svarog>? OnUnload;
