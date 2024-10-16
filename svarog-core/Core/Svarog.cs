@@ -26,6 +26,8 @@ namespace svarog
         public PluginManager plugins;
         public RenderWindow? window;
         public RenderTexture? render;
+        public svarog_core.Inputs.Keyboard keyboard;
+        public svarog_core.Inputs.Mouse mouse;
         public long frame;
 
         public Svarog()
@@ -33,6 +35,8 @@ namespace svarog
             clock = new Clock();
             resources = new Resources();
             plugins = new PluginManager(this);
+            keyboard = new svarog_core.Inputs.Keyboard();
+            mouse = new svarog_core.Inputs.Mouse();
             frame = 0;
         }
     }

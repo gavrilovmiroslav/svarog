@@ -1,6 +1,4 @@
 ﻿using SFML.Graphics;
-using svarog;
-using svarog.Structures;
 
 namespace svarog.Effects
 {
