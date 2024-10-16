@@ -1,4 +1,5 @@
 ﻿using SFML.Graphics;
+using svarog_core.Effects;
 
 namespace svarog.Effects
 {
@@ -10,18 +11,14 @@ namespace svarog.Effects
          
         public override void Load(Svarog instance)
         {
-            if (!Shader.IsAvailable)
+            var shader = ShaderUtility.LoadFromName(name);
+            if (shader == null)
             {
-                Console.WriteLine($"[{this.GetType().Name}] No shaders available.");
                 Stop();
                 return;
             }
 
-            var vert = File.ReadAllText($"Data//{name}//{name.ToLower()}.vert");
-            var frag = File.ReadAllText($"Data//{name}//{name.ToLower()}.frag");
-
-            postprocessShader = Shader.FromString(vert, null, frag);
-
+            postprocessShader = shader;
             postprocessTexture = new RenderTexture(instance.window?.Size.X ?? 1280, instance.window?.Size.Y ?? 800);
             screenSprite = new()
             {

@@ -52,7 +52,7 @@ namespace svarog_core.Inputs
         public void InputDown(TKey input)
         {
             CurrentlyDown.Add(input);
-            LongDownDuration.Add(input, DateTime.Now);
+            LongDownDuration[input] = DateTime.Now;
             LongDown.Add(input);
         }
 
