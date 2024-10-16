@@ -5,6 +5,7 @@ An easy to use, old-school game engine for _olden games_. Think roguelikes, ulti
 ## Quick Start
 
 To start working with Svarog...
+0. have .NET 8 (with C# 12) installed
 1. clone this repository to your machine
 2. open the solution in Visual Studio 2022 or equivalent
 3. build all the projects in the solution
