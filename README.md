@@ -5,11 +5,12 @@ An easy to use, old-school game engine for _olden games_. Think roguelikes, ulti
 ## Quick Start
 
 To start working with Svarog...
-0. have .NET 8 (with C# 12) installed
+0. have Visual Studio 2022 and .NET 8 (with C# 12) installed within it
 1. clone this repository to your machine
 2. open the solution in Visual Studio 2022 or equivalent
-3. build all the projects in the solution
-4. go to the top folder of the repository and run the `run.bat` batch file!
+3. build the `svarog-bin` project first
+4. build all the other plugin projects
+5. go to the top folder of the repository and run the `run.bat` batch file!
 
 You're now set. 
 
