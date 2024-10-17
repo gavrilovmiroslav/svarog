@@ -1,11 +1,13 @@
 ﻿using SFML.Graphics;
 using svarog_core.Effects;
+using static SFML.Window.Keyboard;
 
 namespace svarog.Plugins
 {
     [Plugin(Priority = 1010)]
     public class EmergencyExitPlugin : Plugin
     {
+        private Scancode escapeKey = Scancode.Escape;
         SFML.Graphics.RectangleShape countdownBar;
         Shader? gradient;
 
@@ -20,7 +22,8 @@ namespace svarog.Plugins
 
         public override void Frame(Svarog instance)
         {
-            if (instance.keyboard.GetHoldDuration(SFML.Window.Keyboard.Scancode.F10) > 3000.0)
+            var esc = instance.keyboard.GetHoldDuration(escapeKey);
+            if (esc >= 3000.0)
             {
                 instance.window?.Close();
             }
@@ -28,7 +31,7 @@ namespace svarog.Plugins
 
         public override void Render(Svarog instance)
         {
-            var esc = instance.keyboard.GetHoldDuration(SFML.Window.Keyboard.Scancode.F10);
+            var esc = instance.keyboard.GetHoldDuration(escapeKey);
             if (gradient != null)
             {
                 gradient.SetUniform("size", (float)(esc / 3000.0));

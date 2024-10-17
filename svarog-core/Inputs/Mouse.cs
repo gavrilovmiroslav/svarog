@@ -4,12 +4,14 @@ namespace svarog_core.Inputs
 {
     public class Mouse : InputManager<Button>
     {
-        private (int, int) Position = (0, 0);
+        private (int, int) position = (0, 0);
+
+        public (int, int) Position => position;
 
         public void Move(int x, int y)
         {
-            Position.Item1 = x;
-            Position.Item2 = y;
+            position.Item1 = x;
+            position.Item2 = y;
         }
     }
 }

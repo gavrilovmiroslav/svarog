@@ -144,7 +144,6 @@ namespace svarog
                             if (PluginManager.IsOverriding(t, "Load"))
                             {
                                 Game.OnLoad.AddInvocation(new RPlugin(t.Name, p.Load, priority));
-                                p.Load(svarog);
                             }
                         }
                     }

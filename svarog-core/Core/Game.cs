@@ -55,7 +55,7 @@ namespace svarog
                 svarog.mouse.Frame();
                 Thread.Yield();
 
-                svarog.frame++;
+                svarog.frame++;                
                 if (svarog.frame % 60 == 0) // TODO: move to config
                 {
                     svarog.plugins.Update();

@@ -40,7 +40,7 @@ namespace svarog.Plugins
                     if (key.EndsWith("_")) key = key[..(key.Length - 1)];
                     key = key.FirstCharToUpper();
 
-                    res.Sprites[key] = (texture, new IntRect(column * 32, row * 32, 32, 32));
+                    res.Sprites[key] = new RSprite(texture, new IntRect(column * 32, row * 32, 32, 32));
                     res.NamedSprites.Add(resource, key);
                 }
                 else

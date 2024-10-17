@@ -1,27 +1,14 @@
-﻿using SFML.Graphics;
+﻿using Arch.Core;
+using SFML.Graphics;
 using SFML.System;
 using svarog.Structures;
 
 namespace svarog
 {
-    public class Resources
-    {
-        public Dictionary<string, Texture> Textures = new();
-        public Dictionary<string, (Texture, IntRect)> Sprites = new();
-        public MultiMap<string, string> NamedSprites = new();
-
-        public (Texture, IntRect)? GetSprite(string name)
-        {
-            if (Sprites.TryGetValue(name, out var sprite)) 
-                return sprite;
-            else 
-                return null;
-        }
-    }
-
     public class Svarog
     {
         public Clock clock;
+        public World world;
         public Resources resources;
         public PluginManager plugins;
         public RenderWindow? window;
@@ -33,6 +20,7 @@ namespace svarog
         public Svarog()
         {
             clock = new Clock();
+            world = World.Create();
             resources = new Resources();
             plugins = new PluginManager(this);
             keyboard = new svarog_core.Inputs.Keyboard();
