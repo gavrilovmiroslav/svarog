@@ -6,7 +6,7 @@
     <RootNamespace>svarog_bin</RootNamespace>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <BaseOutputPath>C:\Projects\svarog\svarog-game</BaseOutputPath>
+    <BaseOutputPath>..\svarog-game</BaseOutputPath>
   </PropertyGroup>
 
   <ItemGroup>

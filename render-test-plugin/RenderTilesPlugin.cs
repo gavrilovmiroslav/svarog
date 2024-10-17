@@ -47,7 +47,7 @@ namespace svarog.Plugins
             {
                 Text text = new();
                 text.Font = font;
-                text.CharacterSize = 12;
+                text.CharacterSize = 14;
                 text.FillColor = Color.White;
                 text.OutlineColor = Color.White;
 
