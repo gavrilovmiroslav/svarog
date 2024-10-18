@@ -27,6 +27,7 @@ namespace svarog.Plugins
 
             var generate = () =>
             {
+                instance.resources.Bag("render?", false);
                 Console.WriteLine("GENERATING...");
                 var map = instance.resources.Bag("map", BoolMap.Random(40, 25, 70));
                 instance.resources.RemoveFromBag("flood");
@@ -43,6 +44,7 @@ namespace svarog.Plugins
             sm.Configure(EProcgen.Playback)
                 .OnEntry(() =>
                 {
+                    instance.resources.Bag("render?", true);
                     Console.WriteLine("DONE!");
                 })
                 .Permit(ETrigger.Restart, EProcgen.Generation)
@@ -57,7 +59,11 @@ namespace svarog.Plugins
                     var map = instance.resources.GetFromBag<BoolMap>("map");
                     if (map != null)
                     {
-                        instance.resources?.Bag<IntMap>("flood", map.Flood(x, y));
+                        var flooded = map.Flood(x, y);
+                        if (flooded != null)
+                        {
+                            instance.resources?.Bag<IntMap>("flood", flooded);
+                        }
                     }
                     sm.Fire(ETrigger.Done);
                 })

@@ -1,5 +1,5 @@
 ﻿using SFML.Graphics;
-using svarog_core.Effects;
+using svarog.Effects;
 
 namespace svarog.Effects
 {

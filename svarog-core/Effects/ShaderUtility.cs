@@ -1,6 +1,6 @@
 ﻿using SFML.Graphics;
 
-namespace svarog_core.Effects
+namespace svarog.Effects
 {
     public class ShaderUtility
     {

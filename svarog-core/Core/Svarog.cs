@@ -1,7 +1,6 @@
 ﻿using Arch.Core;
 using SFML.Graphics;
 using SFML.System;
-using svarog.Structures;
 
 namespace svarog
 {
@@ -13,8 +12,8 @@ namespace svarog
         public PluginManager plugins;
         public RenderWindow? window;
         public RenderTexture? render;
-        public svarog_core.Inputs.Keyboard keyboard;
-        public svarog_core.Inputs.Mouse mouse;
+        public Inputs.Keyboard keyboard;
+        public Inputs.Mouse mouse;
         public long frame;
 
         public Svarog()
@@ -22,10 +21,11 @@ namespace svarog
             clock = new Clock();
             world = World.Create();
             resources = new Resources();
-            plugins = new PluginManager(this);
-            keyboard = new svarog_core.Inputs.Keyboard();
-            mouse = new svarog_core.Inputs.Mouse();
+            keyboard = new Inputs.Keyboard();
+            mouse = new Inputs.Mouse();
             frame = 0;
+
+            plugins = new PluginManager(this);
         }
     }
 }

@@ -1,6 +1,7 @@
 1.a. dirt wall (top)
 1.b. dirt wall (side)
 1.c. inner wall
+1.d. white
 
 2.a. rough stone wall (top)
 2.b. rough stone wall (side)

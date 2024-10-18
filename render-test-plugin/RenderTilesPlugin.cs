@@ -9,20 +9,36 @@ namespace svarog.Plugins
     public class RenderTilesPlugin : Plugin
     {
         Font? font;
+        Text text;
+        Sprite sprite;
+
+        public RenderTilesPlugin()
+        {
+            text = new();
+            sprite = new();
+        }
 
         public override void Load(Svarog instance)
         {
             var data = File.ReadAllBytes("Data//Arial.ttf");
             font = new Font(data);
+            text.Font = font;
+            text.CharacterSize = 14;
+            text.FillColor = Color.White;
+            text.OutlineColor = Color.White;
         }
 
         public override void Render(Svarog svarog)
         {
-            Sprite sprite = new();
+            bool ok = svarog.resources.GetFromBag<bool>("render?");
+            if (!ok) return;
 
             var map = svarog.resources.GetFromBag<BoolMap>("map");
             var tiles = svarog.resources.NamedSprites["tiles"];
             int c = 0;
+
+            sprite.Color = Color.White;
+
             for (int i = 0; i < 40; i++)
             {
                 for (int j = 0; j < 25; j++)
@@ -45,21 +61,31 @@ namespace svarog.Plugins
             var flood = svarog.resources.GetFromBag<IntMap>("flood");
             if (flood != null)
             {
-                Text text = new();
-                text.Font = font;
-                text.CharacterSize = 14;
-                text.FillColor = Color.White;
-                text.OutlineColor = Color.White;
-
                 for (int i = 0; i < 40; i++)
                 {
                     for (int j = 0; j < 25; j++)
                     {
-                        if (flood.Values[i, j] > 100) { continue; }
+                        var v = flood.Values[i, j];
+                        if (v > 255) {
+                            sprite.Color = Color.White;
+                            continue; 
+                        }
 
-                        text.DisplayedString = flood.Values[i, j].ToString();
-                        text.Position = new SFML.System.Vector2f(i * 32 + 16 - text.DisplayedString.Length * 4, j * 32);
-                        svarog.render?.Draw(text);
+                        var p = sprite.Position;
+                        p.X = i * 32;
+                        p.Y = j * 32;
+                        sprite.Position = p;
+                        var s = svarog.resources.GetSprite("White");
+                        if (s != null)
+                        {
+                            var a = 255 - v * 5;
+                            if (a < 0) a = 0;
+                            sprite.Color = v == 0 ? new Color(255, 0, 0, 255) : new Color(255, 255, 255, (byte)a);
+                            sprite.Texture = s.Texture;
+                            sprite.TextureRect = s.Coords;
+                            svarog.render?.Draw(sprite);
+                        }
+                        c++;
                     }
                 }
             }

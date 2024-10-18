@@ -1,6 +1,6 @@
 ﻿using SFML.System;
 
-namespace svarog_core.Inputs
+namespace svarog.Inputs
 {
     public class InputManager<TKey> where TKey : notnull
     {

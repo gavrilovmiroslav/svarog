@@ -1,6 +1,6 @@
 ﻿using static SFML.Window.Keyboard;
 
-namespace svarog_core.Inputs
+namespace svarog.Inputs
 {
     public class Keyboard : InputManager<Scancode>
     {

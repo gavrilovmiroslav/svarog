@@ -1,5 +1,5 @@
 ﻿using SFML.Graphics;
-using svarog_core.Effects;
+using svarog.Effects;
 using static SFML.Window.Keyboard;
 
 namespace svarog.Plugins

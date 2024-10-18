@@ -1,6 +1,6 @@
 ﻿using static SFML.Window.Mouse;
 
-namespace svarog_core.Inputs
+namespace svarog.Inputs
 {
     public class Mouse : InputManager<Button>
     {

@@ -38,8 +38,9 @@ namespace svarog.Algorithms
             return map;
         }
 
-        public IntMap Flood(int x, int y)
+        public IntMap? Flood(int x, int y)
         {
+            if (x < 0 || x >= Width || y < 0 || y >= Height) { return null; }
             var map = new IntMap(Width, Height);
             new FloodSpiller().SpillFlood(new FloodParameters(startX: x, startY: y) { Qualifier = (x, y) => Values[x, y] }, map.Values);
             return map;

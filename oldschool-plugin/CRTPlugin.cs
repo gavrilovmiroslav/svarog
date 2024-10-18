@@ -1,28 +1,55 @@
-﻿using svarog.Effects;
+﻿using SFML.Graphics;
+using SFML.Window;
+using svarog.Effects;
 
 namespace svarog.Plugins
 {
     [Plugin(Priority = 1002)]
     public class CRTPlugin : PostprocessPlugin
     {
-        public CRTPlugin() : base("CRT") {}
+        Sprite mouse;
+
+        public CRTPlugin() : base("CRT") 
+        {
+            mouse = new Sprite();
+        }
 
         public override void Load(Svarog instance)
         {
             base.Load(instance);
+            instance.window?.SetMouseCursorVisible(false);
+
+            mouse.Scale = new SFML.System.Vector2f(0.1f, 0.1f);
+            var rs = instance.resources.GetSprite("White");
+            if (rs != null)
+            {
+                mouse.Texture = rs.Texture;
+                mouse.TextureRect = rs.Coords;
+            }
+            mouse.Color = Color.White;
+
             instance.mouse.AddWarper(CRTMonitorWarp);
         }
 
         public override void Unload(Svarog instance)
         {
             base.Unload(instance);
+            instance.window?.SetMouseCursorVisible(true);
             instance.mouse.RemoveWarper(CRTMonitorWarp);
+        }
+
+        public override void Render(Svarog instance)
+        {
+            base.Render(instance);
+            var (x, y) = instance.mouse.Position;
+            mouse.Position = new SFML.System.Vector2f(x, y);
+            instance.render?.Draw(mouse);
         }
 
         private (int, int) CRTMonitorWarp((int, int) xy)
         {
-            var warp = 0.5f;
-            var zoom = -0.05f;
+            var warp = 0.2f;
+            var zoom = -0.01f;
             
             var (x, y) = xy;
             var (u, v) = (x / 1280.0f, y / 800.0f);

@@ -52,9 +52,11 @@ namespace svarog
         }
 
         internal void Update()
-        {            
+        {
             if (waiting.Count > 0)
             {
+                List<(int, IPlugin)> plugins = [];
+
                 foreach (var item in waiting)
                 {
                     byte[] dll = File.ReadAllBytes(item);
@@ -125,6 +127,7 @@ namespace svarog
                         if (instance is IPlugin p)
                         {
                             loadedTypes.Add(item, p);
+                            plugins.Add((priority, p));
 
                             if (PluginManager.IsOverriding(t, "Render"))
                             {
@@ -149,9 +152,15 @@ namespace svarog
                     }
                 }
 
+                foreach (var p in plugins.OrderBy(o => o.Item1))
+                {
+                    p.Item2.Load(svarog);
+                }
+
                 waiting.Clear();
             }
         }
+        
 
         private void Watcher_OnCreated(object sender, FileSystemEventArgs e)
         {

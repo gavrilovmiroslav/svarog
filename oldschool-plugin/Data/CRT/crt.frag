@@ -3,8 +3,8 @@
 uniform sampler2D texture;
 uniform vec2 resolution = vec2(1280.0, 800.0);
 
-uniform float warp = 0.5;
-uniform float zoom = -0.05;
+uniform float warp = 0.2;
+uniform float zoom = -0.01;
 uniform float fade = 0.1;
 
 void main()
