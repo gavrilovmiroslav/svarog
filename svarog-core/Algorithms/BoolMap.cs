@@ -9,8 +9,8 @@ namespace svarog.Algorithms
         public int Width { get; private set; }
         public int Height { get; private set; }
 
-        public BoolMap(int width, int height) 
-        { 
+        public BoolMap(int width, int height)
+        {
             Values = new bool[width, height];
             Width = width;
             Height = height;
@@ -44,6 +44,48 @@ namespace svarog.Algorithms
             var map = new IntMap(Width, Height);
             new FloodSpiller().SpillFlood(new FloodParameters(startX: x, startY: y) { Qualifier = (x, y) => Values[x, y] }, map.Values);
             return map;
+        }
+
+        public BoolMap Find(IntPattern3x3 pattern)
+        {
+            bool CheckMatrix(int i, int j)
+            {
+                for (byte x = 0; x < 3; x++)
+                {
+                    for (byte y = 0; y < 3; y++)
+                    {
+                        if (pattern.IsImportant(x, y))
+                        {
+                            if (Values[i + x - 1, j + y - 1] != (pattern.Matrix[x, y] == EPattern.T))
+                            {
+                                return false;
+                            }
+                        }
+                    }
+                }
+
+                return true;
+            }
+
+            List<(int, int)> toChange = [];
+
+            for (int i = 1; i < Width - 1; i++)
+            {
+                for (int j = 1; j < Height - 1; j++)
+                {
+                    if (CheckMatrix(i, j))
+                    {
+                        toChange.Add((i, j));
+                    }
+                }
+            }
+
+            var result = new BoolMap(Width, Height);
+            foreach (var (i, j) in toChange)
+            {
+                result.Values[i, j] = true;
+            }
+            return result;
         }
     }
 }

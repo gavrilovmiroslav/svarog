@@ -1,37 +1,40 @@
 ﻿namespace svarog.Algorithms
 {
-    public class IntMap
+    public class FloatMap
     {
-        public int[,] Values;
+        public float[,] Values;
         public int Width { get; private set; }
         public int Height { get; private set; }
 
-        public IntMap(int width, int height)
+        public static FloatMap Noise(int width, int height, float scale = 0.5f)
         {
-            Values = new int[width, height];
+            SimplexNoise.Noise.Seed++;
+            var map = new FloatMap(width, height);
+            map.Values = SimplexNoise.Noise.Calc2D(width, height, scale);
+            return map;
+        }
+
+        public FloatMap(int width, int height)
+        {
+            Values = new float[width, height];
             Width = width;
             Height = height;
         }
 
-        public FloatMap ToFloatMap()
+        public IntMap ToIntMap()
         {
-            var map = new FloatMap(Width, Height);
+            var map = new IntMap(Width, Height);
             for (int i = 0; i < Width; i++)
             {
                 for (int j = 0; j < Height; j++)
                 {
-                    map.Values[i, j] = (float)Values[i, j];
+                    map.Values[i, j] = (int)MathF.Round(Values[i, j]);
                 }
             }
             return map;
         }
 
-        public static IntMap Noise(int width, int height, float scale = 0.5f, int mult = 100)
-        {
-            return FloatMap.Noise(width, height, scale).ToIntMap();
-        }
-
-        public BoolMap ToBoolMap(Predicate<int> predicate)
+        public BoolMap ToBoolMap(Predicate<float> predicate)
         {
             var map = new BoolMap(Width, Height);
             for (int i = 0; i < Width; i++)
@@ -45,7 +48,7 @@
             return map;
         }
 
-        public IntMap FilterBelow(int height)
+        public FloatMap FilterBelow(int height)
         {
             for (int i = 0; i < Width; i++)
             {
@@ -58,7 +61,7 @@
             return this;
         }
 
-        public IntMap FilterAbove(int height)
+        public FloatMap FilterAbove(int height)
         {
             for (int i = 0; i < Width; i++)
             {

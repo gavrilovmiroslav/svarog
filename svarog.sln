@@ -19,7 +19,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "plugin-template", "plugin-t
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "emergency-exit-plugin", "emergency-exit-plugin\emergency-exit-plugin.csproj", "{D7B25D31-F0E4-42FF-9636-E8EDDBB1AD7D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "dijkstramap-procgen-plugin", "dijkstramap-procgen-plugin\dijkstramap-procgen-plugin.csproj", "{7DFACFD3-56B7-497A-81C9-5AE2075A782A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "dijkstramap-procgen-plugin", "dijkstramap-procgen-plugin\dijkstramap-procgen-plugin.csproj", "{7DFACFD3-56B7-497A-81C9-5AE2075A782A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "noise-procgen-plugin", "noise-procgen-plugin\noise-procgen-plugin.csproj", "{0B6B99A7-DD25-43D9-A716-419FEA632DD6}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -63,6 +65,10 @@ Global
 		{7DFACFD3-56B7-497A-81C9-5AE2075A782A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7DFACFD3-56B7-497A-81C9-5AE2075A782A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7DFACFD3-56B7-497A-81C9-5AE2075A782A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0B6B99A7-DD25-43D9-A716-419FEA632DD6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0B6B99A7-DD25-43D9-A716-419FEA632DD6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0B6B99A7-DD25-43D9-A716-419FEA632DD6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0B6B99A7-DD25-43D9-A716-419FEA632DD6}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

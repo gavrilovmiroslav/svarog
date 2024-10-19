@@ -36,9 +36,10 @@ namespace svarog
             watcher = new FileSystemWatcher(path);
             watcher.EnableRaisingEvents = true;
             watcher.Filter = "*.dll";
-            watcher.NotifyFilter = NotifyFilters.CreationTime | NotifyFilters.Size;
+            watcher.NotifyFilter = NotifyFilters.CreationTime | NotifyFilters.LastWrite | NotifyFilters.Size;
             watcher.Changed += Watcher_OnChanged;
             watcher.Created += Watcher_OnCreated;
+            // TODO: add deleted
 
             foreach (var file in Directory.EnumerateFiles("Data//Plugins"))
             {
