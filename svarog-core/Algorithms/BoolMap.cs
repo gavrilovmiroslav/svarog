@@ -1,8 +1,17 @@
 ﻿
 using FloodSpill;
+using SFML.System;
 
 namespace svarog.Algorithms
 {
+    public enum ESamplingDistance
+    {
+        Minimal = 1,
+        Low = 2,
+        Moderate = 3,
+        High = 4,
+    }
+
     public class BoolMap
     {
         public bool[,] Values;
@@ -46,6 +55,23 @@ namespace svarog.Algorithms
             return map;
         }
 
+        public static BoolMap EquidistantSampling(int width, int height, ESamplingDistance distance)
+        {
+            var map = new BoolMap(width, height);
+            var samples = PoissonDiscSampling.GeneratePoints(1.0f + (int)distance * MathF.Pow(0.25f, 1 + (float)distance * 0.01f), new Vector2f(width, height), 50);
+            foreach (var sample in samples)
+            {
+                var x = (int)sample.X;
+                var y = (int)sample.Y;
+                if (x >= 0 && y >= 0 && x < width && y < height)
+                {
+                    map.Values[x, y] = true;
+                }
+            }
+
+            return map;
+        }
+
         public BoolMap Find(IntPattern3x3 pattern)
         {
             bool CheckMatrix(int i, int j)
@@ -86,6 +112,22 @@ namespace svarog.Algorithms
                 result.Values[i, j] = true;
             }
             return result;
+        }
+
+        public static int TruthinessToInt(bool b) => b ? 1 : 0;
+
+        public IntMap ToIntMap(Func<bool, int> predicate)
+        {
+            var map = new IntMap(Width, Height);
+            for (int i = 0; i < Width; i++)
+            {
+                for (int j = 0; j < Height; j++)
+                {
+                    map.Values[i, j] = predicate(Values[i, j]);
+                }
+            }
+
+            return map;
         }
     }
 }
