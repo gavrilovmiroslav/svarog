@@ -1,87 +1,44 @@
 ﻿using SFML.Graphics;
 using SFML.System;
+using Stateless;
 using svarog.Algorithms;
 
 namespace svarog.Plugins
 {
     // uncomment this to make the plugin register:
     //[Plugin]
-    public class DelauneyProcgenPlugin : Plugin
+    public class DelauneyProcgenPlugin : GenerativePlugin
     {
-        public Sprite sprite = new();
+        public DelauneyProcgenPlugin() : base("delauney") { }
 
-        public enum EProcgen
+        public override void Generate(Svarog instance, StateMachine<EProcgen, ETrigger> sm)
         {
-            Generation,
-            Playback,
-        }
+            Console.WriteLine("GENERATING...");
 
-        public enum ETrigger
-        {
-            Done,
-            Restart,
-        }
-
-        public override void Load(Svarog instance)
-        {
-            var sm = instance.resources.CreateStateMachine<EProcgen, ETrigger>("graph-procgen", EProcgen.Generation);
-
-            var generate = () =>
+            var equ = instance.resources.Bag("equimap", BoolMap.EquidistantSampling(40, 25, ESamplingDistance.High));
+            var equi = equ.ToIntMap(BoolMap.TruthinessToInt);
+            var points = new List<Vector2f>();
+            for (int i = 0; i < equi.Width; i++)
             {
-                Console.WriteLine("GENERATING...");
-
-                var equ = instance.resources.Bag("equimap", BoolMap.EquidistantSampling(40, 25, ESamplingDistance.High));
-                var equi = equ.ToIntMap(BoolMap.TruthinessToInt);
-                var points = new List<Vector2f>();
-                for (int i = 0; i < equi.Width; i++)
+                for (int j = 0; j < equi.Height; j++)
                 {
-                    for (int j = 0; j < equi.Height; j++)
+                    if (equi.Values[i, j] > 0)
                     {
-                        if (equi.Values[i, j] > 0)
-                        {
-                            points.Add(new Vector2f(i, j));
-                        }
+                        points.Add(new Vector2f(i, j));
                     }
                 }
-                points.Add(new Vector2f(0, 0));
-                points.Add(new Vector2f(equi.Width, 0));
-                points.Add(new Vector2f(0, equi.Height));
-                points.Add(new Vector2f(equi.Width, equi.Height));
+            }
+            points.Add(new Vector2f(0, 0));
+            points.Add(new Vector2f(equi.Width, 0));
+            points.Add(new Vector2f(0, equi.Height));
+            points.Add(new Vector2f(equi.Width, equi.Height));
 
-                var tris = Subdivision.Triangulate(points);
-                var cents = instance.resources.Bag("centroids", new BoolMap(40, 25));
-                foreach (var tri in tris)
-                {
-                    var c = tri.Centroid();
-                    cents.Values[(int)c.X, (int)c.Y] = true;
-                }
-
-                sm.Fire(ETrigger.Done);
-            };
-
-            sm.Configure(EProcgen.Generation)
-                .OnEntry(generate)
-                .OnActivate(generate)
-                .Permit(ETrigger.Done, EProcgen.Playback)
-                .Ignore(ETrigger.Restart);
-
-            sm.Configure(EProcgen.Playback)
-                .OnEntry(() =>
-                {
-                    Console.WriteLine("DONE!");
-                })
-                .Permit(ETrigger.Restart, EProcgen.Generation)
-                .Ignore(ETrigger.Done);
-
-            sm.Activate();
-        }
-
-        public override void Frame(Svarog instance)
-        {
-            if (instance.mouse.IsJustPressed(SFML.Window.Mouse.Button.Right))
+            var tris = Subdivision.Triangulate(points);
+            var cents = instance.resources.Bag("centroids", new BoolMap(40, 25));
+            foreach (var tri in tris)
             {
-                var sm = instance.resources.GetStateMachine<EProcgen, ETrigger>("graph-procgen");
-                sm?.Fire(ETrigger.Restart);
+                var c = tri.Centroid();
+                cents.Values[(int)c.X, (int)c.Y] = true;
             }
         }
 

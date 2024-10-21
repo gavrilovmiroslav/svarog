@@ -6,7 +6,7 @@ using svarog.Effects;
 
 namespace svarog.Plugins
 {
-    [Plugin(Priority = 1002)]
+    //[Plugin(Priority = 1002)]
     public class CRTPlugin : PostprocessPlugin
     {
         Sprite mouse;

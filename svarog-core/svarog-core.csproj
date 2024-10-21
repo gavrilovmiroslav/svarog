@@ -20,6 +20,7 @@
     <PackageReference Include="FloodSpill" Version="1.0.4" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageReference Include="SFML.Net" Version="2.6.0" />
+    <PackageReference Include="SharpGraphLib" Version="1.0.2" />
     <PackageReference Include="SimplexNoise" Version="2.0.0" />
     <PackageReference Include="Stateless" Version="5.16.0" />
   </ItemGroup>

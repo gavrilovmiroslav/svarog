@@ -55,15 +55,16 @@ namespace svarog.Algorithms
             return map;
         }
 
-        public static BoolMap EquidistantSampling(int width, int height, ESamplingDistance distance)
+        public static BoolMap EquidistantSampling(int width, int height, ESamplingDistance distance, float scale = 1.0f)
         {
-            var map = new BoolMap(width, height);
+            var size = new Vector2f(width * scale, height * scale);
+            var map = new BoolMap((int)size.X, (int)size.Y);
             var samples = PoissonDiscSampling.GeneratePoints(1.0f + (int)distance * MathF.Pow(0.25f, 1 + (float)distance * 0.01f), new Vector2f(width, height), 50);
             foreach (var sample in samples)
             {
-                var x = (int)sample.X;
-                var y = (int)sample.Y;
-                if (x >= 0 && y >= 0 && x < width && y < height)
+                var x = (int)(sample.X * scale);
+                var y = (int)(sample.Y * scale);
+                if (x >= 0 && y >= 0 && x < size.X && y < size.Y)
                 {
                     map.Values[x, y] = true;
                 }

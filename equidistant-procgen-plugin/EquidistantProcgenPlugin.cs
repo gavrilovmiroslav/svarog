@@ -1,4 +1,5 @@
 ﻿using SFML.Graphics;
+using Stateless;
 using svarog;
 using svarog.Algorithms;
 using static SFML.Window.Keyboard;
@@ -7,62 +8,25 @@ namespace svarog.Plugins
 {
     // uncomment this to make the plugin register:
     //[Plugin]
-    public class EquidistantProcgenPlugin : Plugin
+    public class EquidistantProcgenPlugin : GenerativePlugin
     {
-        public Sprite sprite = new();
         private bool[] active = [true, false, false, false, false];
 
-        public enum EProcgen
+        public EquidistantProcgenPlugin() : base("equidistant") { }
+
+        public override void Generate(Svarog instance, StateMachine<EProcgen, ETrigger> sm)
         {
-            Generation,
-            Playback,
-        }
+            Console.WriteLine("GENERATING...");
 
-        public enum ETrigger
-        {
-            Done,
-            Restart,
-        }
-
-        public override void Load(Svarog instance)
-        {
-            var sm = instance.resources.CreateStateMachine<EProcgen, ETrigger>("graph-procgen", EProcgen.Generation);
-
-            var generate = () =>
-            {
-                Console.WriteLine("GENERATING...");
-                
-                instance.resources.Bag("equimap1", BoolMap.EquidistantSampling(40, 25, ESamplingDistance.Minimal));
-                instance.resources.Bag("equimap2", BoolMap.EquidistantSampling(40, 25, ESamplingDistance.Low));
-                instance.resources.Bag("equimap3", BoolMap.EquidistantSampling(40, 25, ESamplingDistance.Moderate));
-                instance.resources.Bag("equimap4", BoolMap.EquidistantSampling(40, 25, ESamplingDistance.High));
-                sm.Fire(ETrigger.Done);
-            };
-
-            sm.Configure(EProcgen.Generation)
-                .OnEntry(generate)
-                .OnActivate(generate)
-                .Permit(ETrigger.Done, EProcgen.Playback)
-                .Ignore(ETrigger.Restart);
-
-            sm.Configure(EProcgen.Playback)
-                .OnEntry(() =>
-                {
-                    Console.WriteLine("DONE!");
-                })
-                .Permit(ETrigger.Restart, EProcgen.Generation)
-                .Ignore(ETrigger.Done);
-
-            sm.Activate();
+            instance.resources.Bag("equimap1", BoolMap.EquidistantSampling(40, 25, ESamplingDistance.Minimal));
+            instance.resources.Bag("equimap2", BoolMap.EquidistantSampling(40, 25, ESamplingDistance.Low));
+            instance.resources.Bag("equimap3", BoolMap.EquidistantSampling(40, 25, ESamplingDistance.Moderate));
+            instance.resources.Bag("equimap4", BoolMap.EquidistantSampling(40, 25, ESamplingDistance.High));
         }
 
         public override void Frame(Svarog instance)
         {
-            if (instance.mouse.IsJustPressed(SFML.Window.Mouse.Button.Right))
-            {
-                var sm = instance.resources.GetStateMachine<EProcgen, ETrigger>("graph-procgen");
-                sm?.Fire(ETrigger.Restart);
-            }
+            base.Frame(instance);
 
             if (instance.keyboard.IsJustReleased(Scancode.Num1))
             {

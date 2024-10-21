@@ -26,6 +26,8 @@
             }
         }
 
+        public bool Contains(K key) => _dictionary.ContainsKey(key);
+
         public IEnumerable<K> Keys
         {
             get => _dictionary.Keys;
