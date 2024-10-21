@@ -5,7 +5,7 @@ using svarog.Algorithms;
 namespace svarog.Plugins
 {
     // uncomment this to make the plugin register:
-    //[Plugin]
+    [Plugin]
     public class NoiseProcgenPlugin : Plugin
     {
         public Sprite sprite = new();
@@ -114,24 +114,24 @@ namespace svarog.Plugins
                     sprite.Position = p;
                     var v = (byte)(map?.Values[i, j] ?? 0);
                     sprite.Color = new Color(v, v, v, 255);
-                    svarog.render?.Draw(sprite);
+                    svarog.render?.Draw(sprite, new RenderStates(BlendMode.Add));
 
                     if (hdoors?.Values[i, j] ?? false)
                     {
                         sprite.Color = Color.Green;
-                        svarog.render?.Draw(sprite);
+                        svarog.render?.Draw(sprite, new RenderStates(BlendMode.Add));
                     }
 
                     if (vdoors?.Values[i, j] ?? false)
                     {
                         sprite.Color = Color.Red;
-                        svarog.render?.Draw(sprite);
+                        svarog.render?.Draw(sprite, new RenderStates(BlendMode.Add));
                     }
 
                     if (bigRoom?.Values[i, j] ?? false)
                     {
                         sprite.Color = Color.Blue;
-                        svarog.render?.Draw(sprite);
+                        svarog.render?.Draw(sprite, new RenderStates(BlendMode.Add));
                     }
                     c++;
                 }

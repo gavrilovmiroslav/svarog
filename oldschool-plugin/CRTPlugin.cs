@@ -1,10 +1,12 @@
 ﻿using SFML.Graphics;
+using SFML.System;
 using SFML.Window;
+using svarog.Algorithms;
 using svarog.Effects;
 
 namespace svarog.Plugins
 {
-    [Plugin(Priority = 1002)]
+    //[Plugin(Priority = 1002)]
     public class CRTPlugin : PostprocessPlugin
     {
         Sprite mouse;
@@ -51,17 +53,15 @@ namespace svarog.Plugins
             var warp = 0.2f;
             var zoom = -0.01f;
             
-            var (x, y) = xy;
-            var (u, v) = (x / 1280.0f, y / 800.0f);
-            var (d, c) = (MathF.Abs(0.5f - u), MathF.Abs(0.5f - v));
-            var (d2, c2) = (d * d, c * c);
-
-            u -= 0.5f; u *= 1.0f + (c2 * (0.3f * warp)); u += 0.5f;
-            v -= 0.5f; v *= 1.0f + (d2 * (0.4f * warp)); v += 0.5f;
-
-            u = (u * (1 - zoom)) + zoom / 2;
-            v = (v * (1 - zoom)) + zoom / 2;
-            return ((int)MathF.Round(u * 1280.0f), (int)MathF.Round(v * 800.0f));
+            var v = xy.ToVec();
+            var r = (1280.0f, 800.0f).ToVec();
+            var uv = v.Div(r);
+            var dc = uv.SubFrom(0.5f).Abs();
+            var dc2 = dc.Sqr();
+            uv.X -= 0.5f; uv.X *= 1.0f + (dc2.Y * (0.3f * warp)); uv.X += 0.5f;
+            uv.Y -= 0.5f; uv.Y *= 1.0f + (dc2.X * (0.4f * warp)); uv.Y += 0.5f;
+            uv = (uv * (1 - zoom)).Add(zoom / 2).Mult(r);
+            return uv.ToInts().AsTuple();
         }
     }
 }

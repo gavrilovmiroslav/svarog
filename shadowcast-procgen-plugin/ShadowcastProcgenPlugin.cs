@@ -5,7 +5,7 @@ using svarog.Algorithms;
 namespace svarog.Plugins
 {
     // uncomment this to make the plugin register:
-    [Plugin(Priority = 1100)]
+    //[Plugin(Priority = 1100)]
     public class ShadowcastProcgenPlugin : Plugin
     {
         private readonly int _widthUnits = 40;

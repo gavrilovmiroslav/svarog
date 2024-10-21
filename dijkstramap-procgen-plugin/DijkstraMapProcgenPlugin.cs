@@ -8,7 +8,7 @@ namespace svarog.Plugins
     //[Plugin]
     public class DijkstraMapProcgenPlugin : Plugin
     {
-        Sprite sprite;
+        Sprite sprite = new();
 
         public enum EProcgen
         {
@@ -26,7 +26,6 @@ namespace svarog.Plugins
 
         public override void Load(Svarog instance)
         {
-            sprite = new();
             var sm = instance.resources.CreateStateMachine<EProcgen, ETrigger>("dijkstramap-procgen", EProcgen.Generation);
 
             var generate = () =>
