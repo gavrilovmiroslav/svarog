@@ -8,7 +8,7 @@ using svarog.Structures;
 
 namespace svarog.Plugins
 {
-    [Plugin]
+    //[Plugin]
     public class VoronoiProcgenPlugin : GenerativePlugin
     {
         public VoronoiProcgenPlugin() : base("voronoi") { }

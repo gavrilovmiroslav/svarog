@@ -5,7 +5,7 @@ using svarog.Algorithms;
 namespace svarog.Plugins
 {
     // uncomment this to make the plugin register:
-    [Plugin]
+    //[Plugin]
     public class NoiseProcgenPlugin : Plugin
     {
         public Sprite sprite = new();
