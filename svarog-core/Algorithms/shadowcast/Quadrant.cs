@@ -1,4 +1,4 @@
-﻿namespace shadowcast_procgen_plugin
+﻿namespace svarog.Algorithms.shadowcast
 {
     internal class Quadrant
     {
