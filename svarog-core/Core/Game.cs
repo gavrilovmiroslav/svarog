@@ -1,10 +1,18 @@
 ﻿using SFML.Graphics;
 using SFML.Window;
+using svarog.Structures;
+using FActionDescriptor = (System.Func<svarog.Svarog, 
+    System.Collections.Generic.Dictionary<string, object>, object>, 
+    System.Collections.Generic.Dictionary<string, System.Type>);
 
 namespace svarog
 {
     public class Game
     {
+        internal static Dictionary<string, FActionDescriptor> RegisteredActions = [];
+        internal static MultiMap<string, string> RegisteredFunctions = new();
+
+        internal static List<RPlugin> OnRegister = [];
         internal static List<RPlugin> OnLoad = [];
         internal static List<RPlugin> OnRender = [];
         internal static List<RPlugin> OnFrame = [];
@@ -28,6 +36,8 @@ namespace svarog
 
             svarog.window.Closed += (window, _) => ((RenderWindow?)window)?.Close();
             svarog.window.SetFramerateLimit(120); // TODO: move to config
+
+            OnRegister.Invoke(svarog);
 
             OnLoad.Invoke(svarog);
             Sprite screen = new();

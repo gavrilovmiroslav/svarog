@@ -26,6 +26,20 @@ namespace svarog.Plugins
         {
         }
 
+        public override void Register(Svarog instance)
+        {
+            Export("shadowcast")
+                .With<BoolMap>("map")
+                .With<(int, int)>("position")
+                .With<int>("range")
+                .Returning((svarog, args) => {
+                    return Shadowcast.GenerateShadowCast(
+                        (BoolMap)args["map"], 
+                        ((int, int))args["position"], 
+                        (int)args["range"]);
+                });
+        }
+
         public override void Load(Svarog instance)
         {
             base.Load(instance);
@@ -62,7 +76,7 @@ namespace svarog.Plugins
                 var map = instance.resources.GetFromBag<BoolMap>("mapMatrix");
                 if (map != null)
                 {
-                    var scMap = Shadowcast.GenerateShadowCast(map, (x, y), _visionUnits);
+                    var scMap = (BoolMap?)instance.Invoke("shadowcast", ("map", map), ("position", (x, y)), ("range", _visionUnits));
                     instance.resources?.Bag<BoolMap>("SCmapMatrix", scMap);
                 }
             }

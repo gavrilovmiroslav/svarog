@@ -27,5 +27,40 @@ namespace svarog
 
             plugins = new PluginManager(this);
         }
+
+        public object? Invoke(string name, params (string, object)[] args)
+        {
+            if (!Game.RegisteredActions.ContainsKey(name))
+            {
+                Console.WriteLine($"Warning: cannot invoke registered action {name} -- action not found.");
+                return null;
+            }
+
+            var (action, form) = Game.RegisteredActions[name];
+
+            var dict = new Dictionary<string, object>();
+            foreach(var (key, val) in args)
+            {
+                if (form.TryGetValue(key, out Type? type))
+                {
+                    if (val.GetType().IsAssignableFrom(type))
+                    {
+                        dict[key] = val;
+                    }
+                    else
+                    {
+                        Console.WriteLine($"Warning: parameter {name}#{key} expected to be {type.Name}, but {val.GetType()} found!");
+                        return null;
+                    }
+                }
+                else
+                {
+                    Console.WriteLine($"Warning: parameter {name}#{key} not found!");
+                    return null;
+                }
+            }
+
+            return action.Invoke(this, dict);
+        }
     }
 }

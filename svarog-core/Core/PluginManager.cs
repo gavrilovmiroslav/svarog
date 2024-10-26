@@ -5,11 +5,12 @@ namespace svarog
 {
     public class PluginManager
     {
+        internal static string CurrentlyLoadedPlugin = "";
         private readonly Svarog svarog;
         private readonly HashSet<string> waiting = [];
         private readonly Dictionary<string, int> dllHashes = [];
         private readonly MultiMap<string, IPlugin> loadedTypes = new();
-
+        
         private FileSystemWatcher watcher;
 
         public static bool IsOverriding(Type t, string name)
@@ -89,6 +90,11 @@ namespace svarog
                                     old.Unload(svarog);
                                 }
 
+                                if (PluginManager.IsOverriding(t, "Register"))
+                                {
+                                    Game.OnUnload.RemoveInvocation(old.Register);
+                                }
+
                                 if (PluginManager.IsOverriding(t, "Load"))
                                 {
                                     Game.OnLoad.RemoveInvocation(old.Load);
@@ -104,6 +110,7 @@ namespace svarog
                                     Game.OnFrame.RemoveInvocation(old.Frame);
                                 }
 
+                                Game.RegisteredFunctions.RemoveAll(t.Name);
                                 toRemove.Add(old);
                             }
 
@@ -130,6 +137,11 @@ namespace svarog
                             loadedTypes.Add(item, p);
                             plugins.Add((priority, p));
 
+                            if (PluginManager.IsOverriding(t, "Register"))
+                            {
+                                Game.OnRegister.AddInvocation(new RPlugin(t.Name, p.Register, priority));
+                            }
+
                             if (PluginManager.IsOverriding(t, "Render"))
                             {
                                 Game.OnRender.AddInvocation(new RPlugin(t.Name, p.Render, priority));
@@ -151,6 +163,13 @@ namespace svarog
                             }
                         }
                     }
+                }
+
+                foreach (var p in plugins.OrderBy(o => o.Item1))
+                {
+                    CurrentlyLoadedPlugin = p.Item2.GetType().Name;
+                    p.Item2.Register(svarog);
+                    CurrentlyLoadedPlugin = "";
                 }
 
                 foreach (var p in plugins.OrderBy(o => o.Item1))

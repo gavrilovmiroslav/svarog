@@ -26,6 +26,11 @@
             }
         }
 
+        public void RemoveAll(K key)
+        {
+            _dictionary.Remove(key);
+        }
+
         public bool Contains(K key) => _dictionary.ContainsKey(key);
 
         public IEnumerable<K> Keys
