@@ -1,4 +1,4 @@
-﻿namespace svarog.Algorithms.shadowcast
+﻿namespace svarog.Algorithms
 {
     internal class Quadrant
     {

@@ -1,4 +1,6 @@
-﻿namespace svarog.Algorithms
+﻿using SFML.System;
+
+namespace svarog.Algorithms
 {
     public class FloatMap
     {
@@ -72,6 +74,71 @@
             }
 
             return this;
+        }
+
+        public FloatMap Blur()
+        {
+            FloatMap newMap = new FloatMap(Width, Height);
+            for (int i = 0; i < Width; i++)
+            {
+                for (int j = 0; j < Height; j++)
+                {
+                    var ns = Neighbors(i, j).ToArray();
+                    var v = ns.Select(xy => Values[xy.X, xy.Y]).Sum() / ns.Length;
+                    newMap.Values[i, j] = (Values[i, j] + v) / 2.0f;
+
+                }
+            }
+
+            return newMap;
+        }
+
+        public IEnumerable<Vector2i> Neighbors(int x, int y)
+        {
+            for (int i = -1; i < 2; i++)
+            {
+                for (int j = -1; j < 2; j++)
+                {
+                    if (i == 0 && j == 0) continue;
+                    if (x + i >= 0 && y + j >= 0 && x + i < Width && y + j < Height)
+                    {
+                        yield return new Vector2i(x + i, y + j);
+                    }
+                }
+            }
+        }
+
+        public IEnumerable<Vector2i> DirectNeighbors(int x, int y)
+        {
+            for (int i = -1; i < 2; i++)
+            {
+                for (int j = -1; j < 2; j++)
+                {
+                    if (i != 0 && j != 0) continue;
+                    if (i == 0 && j == 0) continue;
+                    if (x + i >= 0 && y + j >= 0 && x + i < Width && y + j < Height)
+                    {
+                        yield return new Vector2i(x + i, y + j);
+                    }
+                }
+            }
+        }
+
+        public FloatMap Copy(BoolMap pattern)
+        {
+            FloatMap newMap = new FloatMap(Width, Height);
+            for (int i = 0; i < Width; i++)
+            {
+                for (int j = 0; j < Height; j++)
+                {
+                    if (pattern.Values[i, j])
+                    {
+                        newMap.Values[i, j] = this.Values[i, j];
+                    }
+                }
+            }
+
+            return newMap;
         }
     }
 }

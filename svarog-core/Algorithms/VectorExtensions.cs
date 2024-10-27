@@ -55,5 +55,11 @@ namespace svarog.Algorithms
 
         public static (float, float) AsTuple(this Vector2f xy) => (xy.X, xy.Y);
         public static (int, int) AsTuple(this Vector2i xy) => (xy.X, xy.Y);
+
+        public static float Distance(this Vector2f v1, Vector2f v2)
+        {
+            var dv = v1 - v2;
+            return MathF.Sqrt(dv.X * dv.X + dv.Y * dv.Y);
+        }
     }
 }

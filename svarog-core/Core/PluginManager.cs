@@ -9,7 +9,7 @@ namespace svarog
         private readonly Svarog svarog;
         private readonly HashSet<string> waiting = [];
         private readonly Dictionary<string, int> dllHashes = [];
-        private readonly MultiMap<string, IPlugin> loadedTypes = new();
+        private readonly MultiMap<string, IPlugin> loadedPlugins = new();
         
         private FileSystemWatcher watcher;
 
@@ -37,11 +37,11 @@ namespace svarog
             watcher = new FileSystemWatcher(path);
             watcher.EnableRaisingEvents = true;
             watcher.Filter = "*.dll";
-            watcher.NotifyFilter = NotifyFilters.CreationTime | NotifyFilters.LastWrite | NotifyFilters.Size;
+            watcher.NotifyFilter = NotifyFilters.CreationTime | NotifyFilters.LastWrite | NotifyFilters.Size | NotifyFilters.LastAccess;
             watcher.Changed += Watcher_OnChanged;
             watcher.Created += Watcher_OnCreated;
-            // TODO: add deleted
-
+            watcher.Deleted += Watcher_OnDeleted;
+            
             foreach (var file in Directory.EnumerateFiles("Data//Plugins"))
             {
                 if (file.EndsWith(".dll"))
@@ -57,122 +57,155 @@ namespace svarog
         {
             if (waiting.Count > 0)
             {
-                List<(int, IPlugin)> plugins = [];
+                List<(int, IPlugin)> newPlugins = [];
 
                 foreach (var item in waiting)
                 {
-                    byte[] dll = File.ReadAllBytes(item);
-                    var hash = dll.GetHashCode();
-                    if (dllHashes.TryGetValue(item, out int value) && value == hash)
+                    if (File.Exists(item))
                     {
-                        continue;
-                    }
-
-                    dllHashes[item] = hash;
-
-                    var assembly = Assembly.Load(dll);
-
-                    Type type = typeof(IPlugin);
-                    IEnumerable<Type> types = assembly.GetTypes()
-                        .Where(t => type.IsAssignableFrom(t) && t.GetCustomAttribute<PluginAttribute>() is not null)
-                        .OrderBy(t => t.GetCustomAttribute<PluginAttribute>()?.Priority ?? 100);
-
-                    if (loadedTypes.Keys.Contains(item))
-                    {
-                        foreach (Type t in types)
-                        {
-                            List<IPlugin> toRemove = [];
-                            foreach (var old in loadedTypes[item])
-                            {
-                                if (PluginManager.IsOverriding(t, "Unload"))
-                                {
-                                    Game.OnUnload.RemoveInvocation(old.Unload);
-                                    old.Unload(svarog);
-                                }
-
-                                if (PluginManager.IsOverriding(t, "Register"))
-                                {
-                                    Game.OnUnload.RemoveInvocation(old.Register);
-                                }
-
-                                if (PluginManager.IsOverriding(t, "Load"))
-                                {
-                                    Game.OnLoad.RemoveInvocation(old.Load);
-                                }
-
-                                if (PluginManager.IsOverriding(t, "Render"))
-                                {
-                                    Game.OnRender.RemoveInvocation(old.Render);
-                                }
-
-                                if (PluginManager.IsOverriding(t, "Frame"))
-                                {
-                                    Game.OnFrame.RemoveInvocation(old.Frame);
-                                }
-
-                                Game.RegisteredFunctions.RemoveAll(t.Name);
-                                toRemove.Add(old);
-                            }
-
-                            foreach (var old in toRemove)
-                            {
-                                loadedTypes.Remove(item, old);
-                            }
-                        }
-                    }
-
-                    foreach (Type t in types)
-                    {
-                        if (!t.GetCustomAttribute<PluginAttribute>()?.Autoload ?? false)
+                        byte[] dll = File.ReadAllBytes(item);
+                        var hash = dll.GetHashCode();
+                        if (dllHashes.TryGetValue(item, out int value) && value == hash)
                         {
                             continue;
                         }
 
-                        Console.WriteLine($"Checking imports for {item}: {loadedTypes[item].Count} found.");
+                        dllHashes[item] = hash;
 
-                        var priority = t.GetCustomAttribute<PluginAttribute>()?.Priority ?? 100;
-                        var instance = Activator.CreateInstance(t);
-                        if (instance is IPlugin p)
+                        var assembly = Assembly.Load(dll);
+
+                        Type type = typeof(IPlugin);
+                        IEnumerable<Type> types = assembly.GetTypes()
+                            .Where(t => type.IsAssignableFrom(t) && t.GetCustomAttribute<PluginAttribute>() is not null)
+                            .OrderBy(t => t.GetCustomAttribute<PluginAttribute>()?.Priority ?? 100);
+
+                        if (loadedPlugins.Keys.Contains(item))
                         {
-                            loadedTypes.Add(item, p);
-                            plugins.Add((priority, p));
-
-                            if (PluginManager.IsOverriding(t, "Register"))
+                            foreach (Type t in types)
                             {
-                                Game.OnRegister.AddInvocation(new RPlugin(t.Name, p.Register, priority));
+                                foreach (var old in loadedPlugins[item])
+                                {
+                                    if (PluginManager.IsOverriding(t, "Unload"))
+                                    {
+                                        Game.OnUnload.RemoveInvocation(old.Unload);
+                                        old.Unload(svarog);
+                                    }
+
+                                    if (PluginManager.IsOverriding(t, "Register"))
+                                    {
+                                        Game.OnUnload.RemoveInvocation(old.Register);
+                                    }
+
+                                    if (PluginManager.IsOverriding(t, "Load"))
+                                    {
+                                        Game.OnLoad.RemoveInvocation(old.Load);
+                                    }
+
+                                    if (PluginManager.IsOverriding(t, "Render"))
+                                    {
+                                        Game.OnRender.RemoveInvocation(old.Render);
+                                    }
+
+                                    if (PluginManager.IsOverriding(t, "Frame"))
+                                    {
+                                        Game.OnFrame.RemoveInvocation(old.Frame);
+                                    }
+
+                                    Game.RegisteredFunctions.RemoveAll(t.Name);
+                                }
+
+                                loadedPlugins.RemoveAll(item);
+                            }
+                        }
+
+                        foreach (Type t in types)
+                        {
+                            if (!t.GetCustomAttribute<PluginAttribute>()?.Autoload ?? false)
+                            {
+                                continue;
                             }
 
-                            if (PluginManager.IsOverriding(t, "Render"))
-                            {
-                                Game.OnRender.AddInvocation(new RPlugin(t.Name, p.Render, priority));
-                            }
+                            Console.WriteLine($"Checking imports for {item}: {loadedPlugins[item].Count} found.");
 
-                            if (PluginManager.IsOverriding(t, "Frame"))
+                            var priority = t.GetCustomAttribute<PluginAttribute>()?.Priority ?? 100;
+                            var instance = Activator.CreateInstance(t);
+                            if (instance is IPlugin p)
                             {
-                                Game.OnFrame.AddInvocation(new RPlugin(t.Name, p.Frame, priority));
-                            }
+                                loadedPlugins.Add(item, p);
+                                newPlugins.Add((priority, p));
 
-                            if (PluginManager.IsOverriding(t, "Unload"))
-                            {
-                                Game.OnUnload.AddInvocation(new RPlugin(t.Name, p.Unload, priority));
-                            }
+                                if (PluginManager.IsOverriding(t, "Register"))
+                                {
+                                    Game.OnRegister.AddInvocation(new RPlugin(t.Name, p.Register, priority));
+                                }
 
-                            if (PluginManager.IsOverriding(t, "Load"))
-                            {
-                                Game.OnLoad.AddInvocation(new RPlugin(t.Name, p.Load, priority));
+                                if (PluginManager.IsOverriding(t, "Render"))
+                                {
+                                    Game.OnRender.AddInvocation(new RPlugin(t.Name, p.Render, priority));
+                                }
+
+                                if (PluginManager.IsOverriding(t, "Frame"))
+                                {
+                                    Game.OnFrame.AddInvocation(new RPlugin(t.Name, p.Frame, priority));
+                                }
+
+                                if (PluginManager.IsOverriding(t, "Unload"))
+                                {
+                                    Game.OnUnload.AddInvocation(new RPlugin(t.Name, p.Unload, priority));
+                                }
+
+                                if (PluginManager.IsOverriding(t, "Load"))
+                                {
+                                    Game.OnLoad.AddInvocation(new RPlugin(t.Name, p.Load, priority));
+                                }
                             }
                         }
                     }
+                    else
+                    {
+                        foreach (var old in loadedPlugins[item])
+                        {
+                            if (PluginManager.IsOverriding(old.GetType(), "Unload"))
+                            {
+                                Game.OnUnload.RemoveInvocation(old.Unload);
+                                old.Unload(svarog);
+                            }
+
+                            if (PluginManager.IsOverriding(old.GetType(), "Register"))
+                            {
+                                Game.OnUnload.RemoveInvocation(old.Register);
+                            }
+
+                            if (PluginManager.IsOverriding(old.GetType(), "Load"))
+                            {
+                                Game.OnLoad.RemoveInvocation(old.Load);
+                            }
+
+                            if (PluginManager.IsOverriding(old.GetType(), "Render"))
+                            {
+                                Game.OnRender.RemoveInvocation(old.Render);
+                            }
+
+                            if (PluginManager.IsOverriding(old.GetType(), "Frame"))
+                            {
+                                Game.OnFrame.RemoveInvocation(old.Frame);
+                            }
+
+                            Game.RegisteredFunctions.RemoveAll(old.GetType().Name);
+                        }
+
+                        loadedPlugins.RemoveAll(item);
+                    }
                 }
 
-                foreach (var p in plugins.OrderBy(o => o.Item1))
+                foreach (var p in newPlugins.OrderBy(o => o.Item1))
                 {
                     CurrentlyLoadedPlugin = p.Item2.GetType().Name;
                     p.Item2.Register(svarog);
                     CurrentlyLoadedPlugin = "";
                 }
 
-                foreach (var p in plugins.OrderBy(o => o.Item1))
+                foreach (var p in newPlugins.OrderBy(o => o.Item1))
                 {
                     p.Item2.Load(svarog);
                 }
@@ -188,6 +221,11 @@ namespace svarog
         }
 
         private void Watcher_OnChanged(object sender, FileSystemEventArgs e)
+        {
+            waiting.Add(e.FullPath);
+        }
+
+        private void Watcher_OnDeleted(object sender, FileSystemEventArgs e)
         {
             waiting.Add(e.FullPath);
         }

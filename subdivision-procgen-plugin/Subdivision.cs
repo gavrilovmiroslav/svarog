@@ -2,9 +2,9 @@
 using SFML.Graphics;
 using SFML.System;
 using SharpGraph;
-using svarog.Algorithms;
+using System.Diagnostics.Metrics;
 
-namespace svarog.Plugins
+namespace svarog.Algorithms
 {
     class Point(double x, double y) : IPoint
     {
@@ -64,29 +64,6 @@ namespace svarog.Plugins
             }
         }
 
-        public class Voronoi
-        {
-            public List<Polygon> Polygons { get; set; }
-            public Dictionary<int, string> IdToNode { get; set; }
-            public Dictionary<string, Node> Nodes { get; set; }
-            public Graph Connectivity { get; set; }
-            public IntMap Grid { get; set; }
-
-            public Node? this[int id] {
-                get {
-                    if (IdToNode.TryGetValue(id, out var str))
-                    {
-                        if (Nodes.TryGetValue(str, out var node))
-                        {
-                            return node;
-                        }
-                    }
-
-                    return null;
-                }
-            }
-        }
-
         public static List<Polygon> Triangulate(List<Vector2f> points)
         {
             var tris = new List<Polygon>();
@@ -99,7 +76,7 @@ namespace svarog.Plugins
             return tris;
         }
 
-        public static Voronoi VoronoiSubdivide(BoolMap dots)
+        public static (List<Polygon>, Graph, IntMap) Polygonize(IntMap dots)
         {
             var points = new List<Vector2f>();
 
@@ -107,7 +84,7 @@ namespace svarog.Plugins
             {
                 for (int j = 0; j < dots.Height; j++)
                 {
-                    if (dots.Values[i, j])
+                    if (dots.Values[i, j] > 0)
                     {
                         points.Add(new Vector2f(i, j));
                     }
@@ -143,7 +120,6 @@ namespace svarog.Plugins
             });
 
             Dictionary<string, Node> nodes = new();
-            Dictionary<int, string> assignments = new();
             Dictionary<(string, string), SharpGraph.Edge> edgs = new();
 
             foreach (var edge in d.GetEdges())
@@ -164,9 +140,7 @@ namespace svarog.Plugins
                 var dist = MathF.Sqrt(s.X + s.Y);
 
                 var pxy = $"{px},{py}";
-                assignments[voronoi.Values[px, py]] = pxy;
                 var qxy = $"{qx},{qy}";
-                assignments[voronoi.Values[qx, qy]] = qxy;
 
                 if (!nodes.ContainsKey(pxy)) { nodes.Add(pxy, new Node(pxy)); }
                 if (!nodes.ContainsKey(qxy)) { nodes.Add(qxy, new Node(qxy)); }
@@ -183,7 +157,7 @@ namespace svarog.Plugins
                 edges.Add((pxy, qxy), new DelaunatorSharp.Edge(edge.Index, edge.P, edge.Q));
             }
 
-            return new Voronoi() { Polygons = cells, Connectivity = graph, Grid = voronoi, Nodes = nodes, IdToNode = assignments };
+            return (cells, graph, voronoi);
         }
     }
 }

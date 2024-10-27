@@ -1,7 +1,6 @@
 ﻿using SFML.Graphics;
 using Stateless;
 using svarog.Algorithms;
-using svarog.Algorithms.shadowcast;
 
 namespace svarog.Plugins
 {
@@ -9,9 +8,9 @@ namespace svarog.Plugins
     [Plugin(Priority = 1100)]
     public class ShadowcastProcgenPlugin : GenerativePlugin
     {
-        private readonly int _widthUnits = 40;
-        private readonly int _heightUnits = 25;
-        private readonly int _visionUnits = int.MaxValue;
+        private readonly int _widthUnits = 160;
+        private readonly int _heightUnits = 100;
+        private readonly int _visionUnits = 30;
 
         private uint _windowWidth = 0;
         private uint _windowHeight = 0;
@@ -26,23 +25,12 @@ namespace svarog.Plugins
         {
         }
 
-        public override void Register(Svarog instance)
-        {
-            Export("shadowcast")
-                .With<BoolMap>("map")
-                .With<(int, int)>("position")
-                .With<int>("range")
-                .Returning((svarog, args) => {
-                    return Shadowcast.GenerateShadowCast(
-                        (BoolMap)args["map"], 
-                        ((int, int))args["position"], 
-                        (int)args["range"]);
-                });
-        }
-
         public override void Load(Svarog instance)
         {
             base.Load(instance);
+
+            sprite.Scale = new SFML.System.Vector2f(0.25f, 0.25f);
+            shadowSprite.Scale = new SFML.System.Vector2f(0.25f, 0.25f);
 
             _windowHeight = instance.window?.Size.Y ?? 0;
             _windowWidth = instance.window?.Size.X ?? 0;
@@ -57,8 +45,31 @@ namespace svarog.Plugins
         public override void Generate(Svarog instance, StateMachine<EProcgen, ETrigger> sm)
         {
             Console.WriteLine("Generating...");
-            var map = instance.resources.Bag("mapMatrix", IntMap.Noise(_widthUnits, _heightUnits, 0.1f).ToBoolMap(f => f < 150));
-            instance.resources.RemoveFromBag("SCmapMatrix");
+            instance.Invoke("generate level (subdiv)",
+                ("name", "level1"),
+                ("map size", (_widthUnits, _heightUnits)),
+                ("door %", 99),
+                ("corridor distribution", (int x, int y) => 15));
+            var levelMap = instance.resources.GetFromBag<IntMap>("level1: room id map");
+            if (levelMap != null)
+            {
+                var map = instance.resources.Bag<BoolMap>("map", levelMap.ToBoolMap(p => p == 0));
+                instance.resources.RemoveFromBag("shadowcast map");
+
+                var rand = new Random();
+                while (true)
+                {
+                    var x = rand.Next(0, _widthUnits);
+                    var y = rand.Next(0, _heightUnits);
+                    if (levelMap.Values[x, y] > 0)
+                    {
+                        var shadowcastMap = (BoolMap?)instance.Invoke("shadowcast", ("map", map), ("position", (x, y)), ("range", _visionUnits));
+                        var shadowcastBlurMap = shadowcastMap.ToIntMap(i => i ? 255 : 0).Blur().Blur().Copy(shadowcastMap);
+                        instance.resources?.Bag<IntMap>("shadowcast map", shadowcastBlurMap);
+                        break;
+                    }
+                }
+            }
         }
 
         public override void Frame(Svarog instance)
@@ -66,71 +77,58 @@ namespace svarog.Plugins
             base.Frame(instance);
 
             var shiftPressed = instance.keyboard.IsDown(SFML.Window.Keyboard.Scancode.LShift);
-            var isLeftMouse = instance.mouse.IsJustPressed(SFML.Window.Mouse.Button.Left);
+            var isLeftMouse = instance.mouse.IsDown(SFML.Window.Mouse.Button.Left);
             
             if (isLeftMouse)
             {
-                Console.WriteLine("Shadow casting...");
-                var x = (int)instance.mouse.Position.Item1 / WidthScaleFactor;
-                var y = (int)instance.mouse.Position.Item2 / HeightScaleFactor;
-                var map = instance.resources.GetFromBag<BoolMap>("mapMatrix");
+                var x = (int)(instance.mouse.Position.Item1 / WidthScaleFactor);
+                var y = (int)(instance.mouse.Position.Item2 / HeightScaleFactor);
+                var map = instance.resources.GetFromBag<BoolMap>("map");
                 if (map != null)
                 {
-                    var scMap = (BoolMap?)instance.Invoke("shadowcast", ("map", map), ("position", (x, y)), ("range", _visionUnits));
-                    instance.resources?.Bag<BoolMap>("SCmapMatrix", scMap);
+                    var shadowcastMap = (BoolMap?)instance.Invoke("shadowcast", ("map", map), ("position", (x, y)), ("range", _visionUnits));
+                    var shadowcastBlurMap = shadowcastMap.ToIntMap(i => i ? 255 : 0).Blur().Blur().Blur().Copy(shadowcastMap);
+                    instance.resources?.Bag<IntMap>("shadowcast map", shadowcastBlurMap);
                 }
             }
         }
 
         public override void Render(Svarog svarog)
         {
-            var map = svarog.resources.GetFromBag<BoolMap>("mapMatrix");
-            var s = svarog.resources.GetSprite("Catacombs_skull_wall_top");
-            if (s != null)
+            var map = svarog.resources.GetFromBag<BoolMap>("map");
+            var wall = svarog.resources.GetSprite("Catacombs_skull_wall_top");
+            var side = svarog.resources.GetSprite("Catacombs_skull_wall_side");
+            var floor  = svarog.resources.GetSprite("Floor_stone_1");
+            var light = svarog.resources.GetFromBag<IntMap>("shadowcast map");
+
+            if (light == null) return;
+
+            if (wall != null && side != null && floor != null)
             {
-                sprite.Texture = s.Texture;
-                sprite.TextureRect = s.Coords;
+                sprite.Texture = wall.Texture;
 
                 for (int i = 0; i < _widthUnits; i++)
                 {
                     for (int j = 0; j < _heightUnits; j++)
                     {
+                        if (light.Values[i, j] == 0) continue;
+
+                        var p = sprite.Position;
+                        p.X = i * WidthScaleFactor;
+                        p.Y = j * HeightScaleFactor;
+                        sprite.Position = p;
+
                         if (map?.Values[i, j] ?? false)
                         {
-                            var p = sprite.Position;
-                            p.X = i * WidthScaleFactor;
-                            p.Y = j * HeightScaleFactor;
-                            sprite.Position = p;
-
-                            svarog.render?.Draw(sprite);
+                            sprite.TextureRect = wall.Coords;
                         }
-                    }
-                }
-            }
-
-            var scMap = svarog.resources.GetFromBag<BoolMap>("SCmapMatrix");
-
-            s = svarog.resources.GetSprite("White");
-            if (s != null)
-            {
-                shadowSprite.Texture = s.Texture;
-                shadowSprite.TextureRect = s.Coords;
-
-                for (int i = 0; i < _widthUnits; i++)
-                {
-                    for (int j = 0; j < _heightUnits; j++)
-                    {
-                        if (scMap?.Values[i, j] ?? false)
+                        else
                         {
-                            shadowSprite.Color = map?.Values[i, j] ?? false ? shadowSprite.Color = Color.Cyan : shadowSprite.Color = Color.Red;
-
-                            var p = shadowSprite.Position;
-                            p.X = i * WidthScaleFactor;
-                            p.Y = j * HeightScaleFactor;
-                            shadowSprite.Position = p;
-
-                            svarog.render?.Draw(shadowSprite);
+                            sprite.TextureRect = floor.Coords;
                         }
+
+                        sprite.Color = new Color(255, 255, 255, (byte)light.Values[i, j]);
+                        svarog.render?.Draw(sprite);
                     }
                 }
             }

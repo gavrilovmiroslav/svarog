@@ -1,4 +1,4 @@
-﻿namespace svarog.Algorithms.shadowcast
+﻿namespace svarog.Algorithms
 {
     public static class Shadowcast
     {
@@ -22,7 +22,7 @@
             (int, int)? previousTile = null;
             foreach (var tile in row.GetTiles())
             {
-                if (IsWall(map, tile, q) || IsSymetric(row, tile))
+                if (IsWall(map, tile, q) || IsSymmetric(row, tile))
                 {
                     MarkAsVisible(shadows, q.Transform(tile));
                 }
@@ -48,7 +48,7 @@
             }
         }
 
-        static bool IsSymetric(RowData row, (int, int) tile)
+        static bool IsSymmetric(RowData row, (int, int) tile)
         {
             var col = tile.Item2;
 
