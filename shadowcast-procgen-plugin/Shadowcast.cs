@@ -55,7 +55,7 @@
             return (col >= row.Depth * row.StartSlope && col <= row.Depth * row.EndSlope);
         }
 
-        static float Slope(int depth, int column) => ((float)2 * column - 1) / (2 * depth);
+        static float Slope(int depth, int column) => (2.0f * (float)column - 1.0f) / (2.0f * (float)depth);
 
         static void MarkAsVisible(BoolMap outMap, (int, int) coordinates)
         {

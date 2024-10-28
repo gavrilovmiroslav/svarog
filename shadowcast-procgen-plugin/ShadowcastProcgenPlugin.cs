@@ -1,16 +1,17 @@
 ﻿using SFML.Graphics;
+using SFML.System;
 using Stateless;
 using svarog.Algorithms;
 
 namespace svarog.Plugins
 {
     // uncomment this to make the plugin register:
-    [Plugin(Priority = 1100)]
+    [Plugin]
     public class ShadowcastProcgenPlugin : GenerativePlugin
     {
-        private readonly int _widthUnits = 160;
-        private readonly int _heightUnits = 100;
-        private readonly int _visionUnits = 30;
+        private readonly int _widthUnits = 80;
+        private readonly int _heightUnits = 52;
+        private readonly int _visionUnits = 10;
 
         private uint _windowWidth = 0;
         private uint _windowHeight = 0;
@@ -18,7 +19,6 @@ namespace svarog.Plugins
         public int WidthScaleFactor => (int)_windowWidth / _widthUnits;
         public int HeightScaleFactor => (int)_windowHeight / _heightUnits;
 
-        public Sprite sprite = new();
         public Sprite shadowSprite = new();
 
         public ShadowcastProcgenPlugin() : base("shadowcast")
@@ -29,8 +29,8 @@ namespace svarog.Plugins
         {
             base.Load(instance);
 
-            sprite.Scale = new SFML.System.Vector2f(0.25f, 0.25f);
-            shadowSprite.Scale = new SFML.System.Vector2f(0.25f, 0.25f);
+            sprite.Scale = new SFML.System.Vector2f(0.5f, 0.5f);
+            shadowSprite.Scale = new SFML.System.Vector2f(0.5f, 0.5f);
 
             _windowHeight = instance.window?.Size.Y ?? 0;
             _windowWidth = instance.window?.Size.X ?? 0;
@@ -40,6 +40,8 @@ namespace svarog.Plugins
                 Console.WriteLine("ShadowcastProcgenPlugin: Window size is 0 on load!");
                 return;
             }
+
+            instance.resources.Bag<bool>("use light?", true);
         }
 
         public override void Generate(Svarog instance, StateMachine<EProcgen, ETrigger> sm)
@@ -48,8 +50,8 @@ namespace svarog.Plugins
             instance.Invoke("generate level (subdiv)",
                 ("name", "level1"),
                 ("map size", (_widthUnits, _heightUnits)),
-                ("door %", 99),
-                ("corridor distribution", (int x, int y) => 15));
+                ("door %", 100),
+                ("corridor distribution", (int x, int y) => (int)(new Vector2f(x, y).Distance(new Vector2f(_widthUnits / 2, _heightUnits / 2)))));
             var levelMap = instance.resources.GetFromBag<IntMap>("level1: room id map");
             if (levelMap != null)
             {
@@ -91,27 +93,34 @@ namespace svarog.Plugins
                     instance.resources?.Bag<IntMap>("shadowcast map", shadowcastBlurMap);
                 }
             }
+
+            instance.resources.Bag("use light?", instance.keyboard.IsDown(SFML.Window.Keyboard.Scancode.Tab));
+            
         }
 
         public override void Render(Svarog svarog)
         {
+            var useLight = svarog.resources.GetFromBag<bool>("use light?");
             var map = svarog.resources.GetFromBag<BoolMap>("map");
-            var wall = svarog.resources.GetSprite("Catacombs_skull_wall_top");
-            var side = svarog.resources.GetSprite("Catacombs_skull_wall_side");
-            var floor  = svarog.resources.GetSprite("Floor_stone_1");
+            var wall = svarog.resources.GetSprite("Dirt_wall_top");
+            var side = svarog.resources.GetSprite("Dirt_wall_side");
+            var floor1  = svarog.resources.GetSprite("Blank_floor");
+            var floor2 = svarog.resources.GetSprite("Blank_floor_dark_purple");
             var light = svarog.resources.GetFromBag<IntMap>("shadowcast map");
 
             if (light == null) return;
 
-            if (wall != null && side != null && floor != null)
+            if (wall != null && side != null && floor1 != null && floor2 != null)
             {
                 sprite.Texture = wall.Texture;
 
+                int c = 0;
                 for (int i = 0; i < _widthUnits; i++)
                 {
                     for (int j = 0; j < _heightUnits; j++)
                     {
-                        if (light.Values[i, j] == 0) continue;
+                        c++;
+                        if (!useLight && light.Values[i, j] == 0) continue;
 
                         var p = sprite.Position;
                         p.X = i * WidthScaleFactor;
@@ -120,16 +129,24 @@ namespace svarog.Plugins
 
                         if (map?.Values[i, j] ?? false)
                         {
-                            sprite.TextureRect = wall.Coords;
+                            if (j < _heightUnits - 1 && (!map?.Values[i, j + 1] ?? false))
+                            {
+                                sprite.TextureRect = side.Coords;
+                            }
+                            else
+                            {
+                                sprite.TextureRect = wall.Coords;
+                            }
                         }
                         else
                         {
-                            sprite.TextureRect = floor.Coords;
+                            sprite.TextureRect = (c % 2 == 0) ? floor1.Coords : floor2.Coords;
                         }
 
-                        sprite.Color = new Color(255, 255, 255, (byte)light.Values[i, j]);
-                        svarog.render?.Draw(sprite);
+                        sprite.Color = !useLight ? new Color(255, 255, 255, (byte)light.Values[i, j]) : Color.White;
+                        svarog.render?.Draw(sprite);   
                     }
+                    c++;
                 }
             }
         }

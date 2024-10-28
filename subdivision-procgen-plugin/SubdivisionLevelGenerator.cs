@@ -45,6 +45,7 @@ namespace subdivision_procgen_plugin
             var noise = FloatMap.Noise(width, height, 0.9f);
             var connectedness = new Dictionary<int, int>();
             var doorSet = new HashSet<string>();
+
             // Initialize noisemap
             for (int i = 0; i < width; i++)
             {
@@ -93,38 +94,35 @@ namespace subdivision_procgen_plugin
                             }
                             else
                             {
-                                if (rand.Next(0, 100) > corridorConnections(x, y))
+                                var neighbors = rooms.Neighbors(x, y);
+                                if (neighbors.Any(n => rooms.Values[n.X, n.Y] > 0 && rooms.Values[n.X, n.Y] != id))
                                 {
-                                    var neighbors = rooms.Neighbors(x, y);
-                                    if (neighbors.Any(n => rooms.Values[n.X, n.Y] > 0 && rooms.Values[n.X, n.Y] != id))
+                                    var vid = v[id];
+                                    if (vid.HasValue && v.Connectivity.Degree(vid.Value) <= 3)
                                     {
-                                        var vid = v[id];
-                                        if (vid.HasValue && v.Connectivity.Degree(vid.Value) <= 3)
-                                        {
-                                            var others = neighbors.Select(n => v.Grid.Values[n.X, n.Y]).Distinct().Where(i => i != id && i != 0).ToList();
-                                            if (others.Count == 0)
-                                            {
-                                                continue;
-                                            }
-                                            else
-                                            {
-                                                foreach (var other in others)
-                                                {
-                                                    if (!v[other].HasValue) continue;
-                                                    var vot = v[other].Value;
-                                                    if (!treeGraph.GetEdge(vid.Value, vot).HasValue)
-                                                    {
-                                                        v.Connectivity.AddEdge(vid.Value, vot);
-                                                        addEdgesToTree.Add(v.Connectivity.GetEdge(vid.Value, vot).Value);
-                                                    }
-                                                }
-                                            }
-                                        }
-                                        else
+                                        var others = neighbors.Select(n => v.Grid.Values[n.X, n.Y]).Distinct().Where(i => i != id && i != 0).ToList();
+                                        if (others.Count == 0)
                                         {
                                             continue;
                                         }
-                                    } 
+                                        else
+                                        {
+                                            foreach (var other in others)
+                                            {
+                                                if (!v[other].HasValue) continue;
+                                                var vot = v[other].Value;
+                                                if (!treeGraph.GetEdge(vid.Value, vot).HasValue)
+                                                {
+                                                    v.Connectivity.AddEdge(vid.Value, vot);
+                                                    addEdgesToTree.Add(v.Connectivity.GetEdge(vid.Value, vot).Value);
+                                                }
+                                            }
+                                        }
+                                    }
+                                    else
+                                    {
+                                        continue;
+                                    }
                                 }
 
                                 heightmap.Values[x, y] = 255;
@@ -179,8 +177,8 @@ namespace subdivision_procgen_plugin
                         if (heightmap.Values[px, py] < 128)
                         {
                             change.Add((px, py));
-                            delete.Add((px, py - 1));
-                            delete.Add((px, py + 1));
+                            //delete.Add((px, py - 1));
+                            //delete.Add((px, py + 1));
                         }
                     }
                 }
@@ -194,8 +192,8 @@ namespace subdivision_procgen_plugin
                         if (heightmap.Values[px, py] < 128)
                         {
                             change.Add((px, py));
-                            delete.Add((px - 1, py));
-                            delete.Add((px + 1, py));
+                            //delete.Add((px - 1, py));
+                            //delete.Add((px + 1, py));
                         }
                     }
                 }
