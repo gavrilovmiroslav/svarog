@@ -36,13 +36,11 @@ namespace svarog.Plugins
                 .With<string>("name")
                 .With<(int, int)>("map size")
                 .With<int>("door %")
-                .With<Func<int, int, int>>("corridor distribution")
                 .Returning((svarog, args) =>
                 {
                     var level = SubdivisionLevelGenerator.Generate(svarog, 
                         ((int, int))args["map size"], 
-                        (int)args["door %"], 
-                        (Func<int, int, int>)args["corridor distribution"]);
+                        (int)args["door %"]);
 
                     var name = (string)args["name"];
                     svarog.resources.Bag($"{name}: floor plan", level.FloorPlan);

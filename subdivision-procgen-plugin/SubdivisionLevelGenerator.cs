@@ -17,8 +17,6 @@ namespace subdivision_procgen_plugin
         public class LevelDescriptor
         {
             public (int, int) MapSize;
-            public int DoorProbability;
-            public Func<int, int, int> CorridorDistribution;
             public Graph FloorPlan;
             public IntMap RoomIdMap;
             public HashSet<string> Doors;
@@ -32,7 +30,7 @@ namespace subdivision_procgen_plugin
             return (int.Parse(x), int.Parse(y));
         }
 
-        public static LevelDescriptor Generate(Svarog instance, (int, int) mapSize, int doorProbability, Func<int, int, int> corridorConnections)
+        public static LevelDescriptor Generate(Svarog instance, (int, int) mapSize, int doorProbability)
         {
             var rand = new Random();
             var (width, height) = mapSize;
@@ -290,8 +288,7 @@ namespace subdivision_procgen_plugin
             Console.WriteLine(treeGraph.GetConnectedComponents().Count);
             return new LevelDescriptor { 
                 MapSize = mapSize,
-                DoorProbability = doorProbability,
-                CorridorDistribution = corridorConnections,
+                
                 FloorPlan = treeGraph, 
                 RoomIdMap = rooms,
                 Doors = doorSet

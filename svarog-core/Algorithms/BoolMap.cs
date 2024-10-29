@@ -25,6 +25,19 @@ namespace svarog.Algorithms
             Height = height;
         }
 
+        public BoolMap Clear()
+        {
+            for (int i = 0; i < Width; i++)
+            {
+                for (int j = 0; j < Height; j++)
+                {
+                    Values[i, j] = false;
+                }
+            }
+
+            return this;
+        }
+
         public static BoolMap Random(int width, int height, int percentFilled)
         {
             var map = new BoolMap(width, height);
@@ -129,6 +142,32 @@ namespace svarog.Algorithms
             }
 
             return map;
+        }
+
+        public BoolMap InplaceCombine(BoolMap map)
+        {
+            for (int i = 0; i < Width; i++)
+            {
+                for (int j = 0; j < Height; j++)
+                {
+                    Values[i, j] = Values[i, j] || map.Values[i, j];
+                }
+            }
+
+            return this;
+        }
+
+        public BoolMap Combine(BoolMap map)
+        {
+            var newMap = new BoolMap(Width, Height);
+            for (int i = 0; i < Width; i++)
+            {
+                for (int j = 0; j < Height; j++)
+                {
+                    newMap.Values[i, j] = Values[i, j] || map.Values[i, j];
+                }
+            }
+            return newMap;
         }
     }
 }

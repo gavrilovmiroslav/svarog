@@ -39,7 +39,6 @@ namespace svarog
 
             OnRegister.Invoke(svarog);
 
-            OnLoad.Invoke(svarog);
             Sprite screen = new();
 
             while (svarog.window.IsOpen)

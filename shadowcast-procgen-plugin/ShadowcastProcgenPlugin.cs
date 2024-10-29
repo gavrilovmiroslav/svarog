@@ -6,11 +6,11 @@ using svarog.Algorithms;
 namespace svarog.Plugins
 {
     // uncomment this to make the plugin register:
-    [Plugin]
+    // [Plugin]
     public class ShadowcastProcgenPlugin : GenerativePlugin
     {
         private readonly int _widthUnits = 80;
-        private readonly int _heightUnits = 52;
+        private readonly int _heightUnits = 50;
         private readonly int _visionUnits = 10;
 
         private uint _windowWidth = 0;
@@ -49,9 +49,8 @@ namespace svarog.Plugins
             Console.WriteLine("Generating...");
             instance.Invoke("generate level (subdiv)",
                 ("name", "level1"),
-                ("map size", (_widthUnits, _heightUnits)),
-                ("door %", 100),
-                ("corridor distribution", (int x, int y) => (int)(new Vector2f(x, y).Distance(new Vector2f(_widthUnits / 2, _heightUnits / 2)))));
+                ("map size", (_widthUnits * 2, _heightUnits * 2)),
+                ("door %", 100));
             var levelMap = instance.resources.GetFromBag<IntMap>("level1: room id map");
             if (levelMap != null)
             {
@@ -144,6 +143,10 @@ namespace svarog.Plugins
                         }
 
                         sprite.Color = !useLight ? new Color(255, 255, 255, (byte)light.Values[i, j]) : Color.White;
+                        if (map?.Values[i, j] ?? false)
+                        {
+                            sprite.Color = Color.White;
+                        }
                         svarog.render?.Draw(sprite);   
                     }
                     c++;

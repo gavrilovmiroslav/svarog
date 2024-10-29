@@ -51,6 +51,8 @@ namespace svarog.Algorithms
         public static Vector2f ToVec(this (int, int) xy) => new Vector2f(xy.Item1, xy.Item2);
         public static Vector2f ToVec(this (float, float) xy) => new Vector2f(xy.Item1, xy.Item2);
 
+        public static Vector2f ToFloats(this Vector2u xy) => new Vector2f(xy.X, xy.Y);
+        public static Vector2f ToFloats(this Vector2i xy) => new Vector2f(xy.X, xy.Y);
         public static Vector2i ToInts(this Vector2f xy) => new Vector2i((int)MathF.Round(xy.X), (int)MathF.Round(xy.Y));
 
         public static (float, float) AsTuple(this Vector2f xy) => (xy.X, xy.Y);

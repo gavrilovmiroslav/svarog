@@ -24,8 +24,7 @@ namespace svarog.Plugins
             _level = instance.Invoke("generate level (subdiv)", 
                 ("name", "level1"),
                 ("map size", (160, 100)), 
-                ("door %", 100), 
-                ("corridor distribution", (int x, int y) => (int)(new Vector2f(x, y).Distance(new Vector2f(80, 50))))) as LevelDescriptor;
+                ("door %", 100)) as LevelDescriptor;
         }
 
         public override void Render(Svarog svarog)
