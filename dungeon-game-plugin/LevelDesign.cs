@@ -5,6 +5,7 @@ using svarog;
 using svarog.Algorithms;
 using svarog.Structures;
 using System.Diagnostics;
+using System.Threading;
 
 namespace dungeon_game_plugin
 {
@@ -28,6 +29,7 @@ namespace dungeon_game_plugin
 
         public LevelDesign(Svarog svarog) 
         {
+            svarog.world.Clear();
             var size = svarog.resources.Bag("glyphSize", new Vector2i(160, 100));
 
             svarog.Invoke(
@@ -78,8 +80,23 @@ namespace dungeon_game_plugin
                 new Player(), 
                 new Position(new Vector2i(bx, by)), 
                 new CameraTarget(1.0f), 
-                new Sight(15, null, null), 
+                new Sight(7, null, null), 
                 new RoguesImage("Rogue"));
+
+            svarog.world.Create(
+                new Monster(),
+                new Position(new Vector2i(bx - 2, by - 2)),
+                new RoguesImage("Goblin_archer"));
+
+            svarog.world.Create(
+                new Monster(),
+                new Position(new Vector2i(bx - 3, by - 1)),
+                new RoguesImage("Goblin_mage"));
+
+            svarog.world.Create(
+                new Monster(),
+                new Position(new Vector2i(bx - 5, by - 5)),
+                new RoguesImage("Orc_warchief"));
         }
 
         public void DebugRender(Svarog svarog)

@@ -22,6 +22,14 @@ namespace dungeon_game_plugin
             sprite.Scale = new SFML.System.Vector2f(0.25f, 0.25f);
         }
 
+        public override void Frame(Svarog svarog)
+        {
+            if (svarog.keyboard.IsJustReleased(SFML.Window.Keyboard.Scancode.Tab))
+            {
+                GenerateLevel(svarog);
+            }
+        }
+
         public override void Render(Svarog svarog)
         {
             base.Render(svarog);

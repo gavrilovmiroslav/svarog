@@ -1,4 +1,5 @@
 ﻿using SFML.System;
+using System.Diagnostics;
 
 namespace svarog.Algorithms
 {
@@ -45,6 +46,21 @@ namespace svarog.Algorithms
             }
 
             return map;
+        }
+
+        public IntMap Filter(BoolMap map)
+        {
+            Debug.Assert(Width == map.Width && Height == map.Height);
+            var newMap = new IntMap(Width, Height);
+            for (int i = 0; i < Width; i++)
+            {
+                for (int j = 0; j < Height; j++)
+                {
+                    newMap.Values[i, j] = map.Values[i, j] ? Values[i, j] : 0;
+                }
+            }
+
+            return newMap;
         }
 
         public IntMap FilterBelow(int height)

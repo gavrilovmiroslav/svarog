@@ -1,4 +1,5 @@
 ﻿using Arch.Core;
+using Arch.Core.Extensions;
 using FloodSpill;
 using SFML.Graphics;
 using SFML.System;
@@ -18,6 +19,7 @@ namespace dungeon_game_plugin
         Vector2f cameraTarget = new();
 
         Vector2f glyphSize;
+        float zoom = 2.0f;
         float lag = 0.05f;
 
         BoolMap light;
@@ -38,7 +40,8 @@ namespace dungeon_game_plugin
             var size = svarog.resources.GetFromBag<Vector2i>("glyphSize");
             glyphSize = size.ToFloats();
             light = new BoolMap(size.X, size.Y);
-            cameraPosition = new Vector2f(0, 0); // glyphSize.X / 2, glyphSize.Y / 2);
+            cameraPosition = glyphSize * 16 * zoom;
+            
         }
 
         public override void Frame(Svarog svarog)
@@ -53,17 +56,25 @@ namespace dungeon_game_plugin
             svarog.world.Query(in cameraTargetQuery, (Entity entity, ref CameraTarget target, ref Position position) => 
             {
                 targetCount++;
-                newTarget += 32 * position.At.ToFloats() * target.Weight;
+                newTarget += (32 * zoom) * position.At.ToFloats() * target.Weight;
             });
 
             if (targetCount == 0) return;
 
             cameraTarget = (cameraPosition + newTarget / targetCount) / 2;
             cameraPosition = Lerp.Linear(cameraPosition, cameraTarget, lag);
+            
+            var windowCenter = svarog.window.Size.ToFloats() / 2;
+            svarog.resources.Bag<Vector2f>("camera offset", windowCenter - cameraPosition);
         }
 
         public override void Render(Svarog svarog)
         {
+            var s = sprite.Scale;
+            s.X = zoom;
+            s.Y = zoom;
+            sprite.Scale = s;
+
             light = light.Clear();
             svarog.world.Query(in playerSightQuery, (Entity entity, ref Player player, ref Sight sight) =>
             {
@@ -71,34 +82,16 @@ namespace dungeon_game_plugin
                 {
                     light = light.InplaceCombine(sight.LastFov);
                 }
-                else
-                {}
             });
+            var lightMap = light.ToIntMap(p => p ? 255 : 0).Blur().Filter(light);
 
-            /*
-             *                 
-
-             */
-            Dictionary<Vector2i, RSprite?> onMap = [];
-            Dictionary<Vector2i, Vector2f> realWorldCoord = [];
-            svarog.world.Query(in roguesImagesPositionQuery, (Entity entity, ref RoguesImage image, ref Position position) =>
-            {
-                var t = svarog.resources.GetSprite(image.Image);
-                onMap[new Vector2i(position.At.X, position.At.Y)] = t;
-            });
-
+            var spriteSize = 32 * zoom;
             var map = svarog.resources.GetFromBag<BoolMap>("dungeon: has floor");
             var windowCenter = svarog.window.Size.ToFloats() / 2;
-            var glyphWindowSize = svarog.window.Size.ToFloats() / 32;
+            var glyphWindowSize = svarog.window.Size.ToFloats() / spriteSize;
             var leftTop = cameraPosition - windowCenter;
-            var leftTopCoord = (leftTop / 32).ToInts();
-            if (leftTopCoord.X < 0) leftTopCoord.X = 0;
-            if (leftTopCoord.Y < 0) leftTopCoord.Y = 0;
-
-            var bottomDownCoord = leftTopCoord + glyphWindowSize.ToInts();
-            if (bottomDownCoord.X >= (int)glyphSize.X) bottomDownCoord.X = (int)glyphSize.X - 1;
-            if (bottomDownCoord.Y >= (int)glyphSize.Y) bottomDownCoord.Y = (int)glyphSize.Y - 1;
-
+            var leftTopCoord = leftTop / spriteSize;
+            
             var wall = svarog.resources.GetSprite("Dirt_wall_top");
             var side = svarog.resources.GetSprite("Dirt_wall_side");
             var floor1 = svarog.resources.GetSprite("Blank_floor");
@@ -106,25 +99,30 @@ namespace dungeon_game_plugin
 
             sprite.Texture = wall.Texture;
             int c = 0;
-            for (var i = 0; i < bottomDownCoord.X - leftTopCoord.X; i++)
+            for (int i = 0; i < map.Width; i++)
             {
-                for (var j = 0; j < bottomDownCoord.Y - leftTopCoord.Y; j++)
+                c++;
+                for (int j = 0; j < map.Height; j++)
                 {
                     c++;
 
                     var p = sprite.Position;
-                    p.X = i * 32;
-                    p.Y = j * 32;
-                    
+                    p.X = windowCenter.X - cameraPosition.X + i * spriteSize;
+                    p.Y = windowCenter.Y - cameraPosition.Y + j * spriteSize;
+
+                    if (p.X + 2 * spriteSize < 0 || p.Y + 2 * spriteSize < 0) continue;
+                    if (p.X - 2 * spriteSize >= svarog.window.Size.X || p.Y - 2 * spriteSize >= svarog.window.Size.Y) continue;
                     sprite.Position = p;
 
-                    var (nx, ny) = (leftTopCoord.X + i, leftTopCoord.Y + j);
-                    realWorldCoord[new Vector2i(nx, ny)] = p;
+                    if (i < 0) continue;
+                    if (j < 0) continue;
+                    if (i >= (int)glyphSize.X) continue;
+                    if (j >= (int)glyphSize.Y) continue;
 
-                    if (!light.Values[nx, ny]) continue;
-                    if (map?.Values[nx, ny] ?? false)
+                    if (!light.Values[i, j]) continue;
+                    if (map?.Values[i, j] ?? false)
                     {
-                        if (j < 100 - 1 && (!map?.Values[nx, ny + 1] ?? false))
+                        if (j < 100 - 1 && (!map?.Values[i, j + 1] ?? false))
                         {
                             sprite.TextureRect = side.Coords;
                         }
@@ -138,32 +136,36 @@ namespace dungeon_game_plugin
                         sprite.TextureRect = (c % 2 == 0) ? floor1.Coords : floor2.Coords;
                     }
 
-                    var l = 255;
+                    var l = lightMap.Values[i, j];
                     sprite.Color = new Color(255, 255, 255, (byte)l);
-                    if (map?.Values[nx, ny] ?? false)
+                    if (map?.Values[i, j] ?? false)
                     {
                         sprite.Color = Color.White;
                     }
-                    svarog.render?.Draw(sprite);
+                    svarog.render?.Draw(sprite, new RenderStates(BlendMode.Alpha));
                 }
             }
 
-            foreach (var e in onMap)
+            svarog.world.Query(in roguesImagesPositionQuery, (Entity entity, ref RoguesImage image, ref Position position) =>
             {
-                var ij = e.Key;
-                var tt = e.Value;
+                var t = svarog.resources.GetSprite(image.Image);
 
-                if (realWorldCoord.ContainsKey(ij))
-                {
-                    var xy = realWorldCoord[ij];
-                    sprite.Texture = tt.Texture;
-                    sprite.TextureRect = tt.Coords;
+                var p = sprite.Position;
+                p.X = windowCenter.X - cameraPosition.X + position.At.X * spriteSize;
+                p.Y = windowCenter.Y - cameraPosition.Y + position.At.Y * spriteSize - (spriteSize / 4);
+                sprite.Position = p;
 
-                    sprite.Position = xy;
-                    sprite.Color = Color.White;
-                    svarog.render?.Draw(sprite);
-                }
-            }
+                sprite.Texture = t.Texture;
+                sprite.TextureRect = t.Coords;
+
+                sprite.Color = new Color(255, 255, 255, (byte)lightMap.Values[position.At.X, position.At.Y]);
+
+                var s = sprite.Scale;
+                s.X = (entity.Has<Monster>() ? -1 : 1) * zoom;
+                sprite.Scale = s;
+
+                svarog.render?.Draw(sprite, new RenderStates(BlendMode.Alpha));
+            });
         }
     }
 }
