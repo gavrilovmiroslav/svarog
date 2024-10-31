@@ -78,24 +78,24 @@ namespace dungeon_game_plugin
             var (bx, by) = ParseLabel(bestRoom.Value.GetLabel());
             svarog.world.Create(
                 new Player(), 
-                new Position(new Vector2i(bx, by)), 
+                new Position(new Vector2f(bx, by)), 
                 new CameraTarget(1.0f), 
-                new Sight(7, null, null), 
+                new Sight(10, null, null), 
                 new RoguesImage("Rogue"));
 
             svarog.world.Create(
                 new Monster(),
-                new Position(new Vector2i(bx - 2, by - 2)),
+                new Position(new Vector2f(bx - 2, by - 2)),
                 new RoguesImage("Goblin_archer"));
 
             svarog.world.Create(
                 new Monster(),
-                new Position(new Vector2i(bx - 3, by - 1)),
+                new Position(new Vector2f(bx - 3, by - 1)),
                 new RoguesImage("Goblin_mage"));
 
             svarog.world.Create(
                 new Monster(),
-                new Position(new Vector2i(bx - 5, by - 5)),
+                new Position(new Vector2f(bx - 5, by - 5)),
                 new RoguesImage("Orc_warchief"));
         }
 

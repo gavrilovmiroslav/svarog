@@ -13,7 +13,6 @@ namespace dungeon_game_plugin
     {
         QueryDescription cameraTargetQuery;
         QueryDescription playerSightQuery;
-        QueryDescription roguesImagesPositionQuery;
 
         Vector2f cameraPosition = new();
         Vector2f cameraTarget = new();
@@ -31,7 +30,6 @@ namespace dungeon_game_plugin
         {
             cameraTargetQuery = new QueryDescription().WithAll<CameraTarget, Position>();
             playerSightQuery = new QueryDescription().WithAll<Player, Sight>();
-            roguesImagesPositionQuery = new QueryDescription().WithAll<RoguesImage, Position>();
         }
 
         public override void Load(Svarog svarog)
@@ -56,7 +54,7 @@ namespace dungeon_game_plugin
             svarog.world.Query(in cameraTargetQuery, (Entity entity, ref CameraTarget target, ref Position position) => 
             {
                 targetCount++;
-                newTarget += (32 * zoom) * position.At.ToFloats() * target.Weight;
+                newTarget += (32 * zoom) * position.At * target.Weight;
             });
 
             if (targetCount == 0) return;
@@ -66,10 +64,12 @@ namespace dungeon_game_plugin
             
             var windowCenter = svarog.window.Size.ToFloats() / 2;
             svarog.resources.Bag<Vector2f>("camera offset", windowCenter - cameraPosition);
+            svarog.resources.Bag<float>("camera zoom", zoom);
         }
 
         public override void Render(Svarog svarog)
         {
+            var memory = svarog.resources.GetFromBag<BoolMap>("dungeon: memory");
             var s = sprite.Scale;
             s.X = zoom;
             s.Y = zoom;
@@ -84,6 +84,7 @@ namespace dungeon_game_plugin
                 }
             });
             var lightMap = light.ToIntMap(p => p ? 255 : 0).Blur().Filter(light);
+            svarog.resources.Bag<IntMap>("lightmap", lightMap);
 
             var spriteSize = 32 * zoom;
             var map = svarog.resources.GetFromBag<BoolMap>("dungeon: has floor");
@@ -119,7 +120,6 @@ namespace dungeon_game_plugin
                     if (i >= (int)glyphSize.X) continue;
                     if (j >= (int)glyphSize.Y) continue;
 
-                    if (!light.Values[i, j]) continue;
                     if (map?.Values[i, j] ?? false)
                     {
                         if (j < 100 - 1 && (!map?.Values[i, j + 1] ?? false))
@@ -146,26 +146,6 @@ namespace dungeon_game_plugin
                 }
             }
 
-            svarog.world.Query(in roguesImagesPositionQuery, (Entity entity, ref RoguesImage image, ref Position position) =>
-            {
-                var t = svarog.resources.GetSprite(image.Image);
-
-                var p = sprite.Position;
-                p.X = windowCenter.X - cameraPosition.X + position.At.X * spriteSize;
-                p.Y = windowCenter.Y - cameraPosition.Y + position.At.Y * spriteSize - (spriteSize / 4);
-                sprite.Position = p;
-
-                sprite.Texture = t.Texture;
-                sprite.TextureRect = t.Coords;
-
-                sprite.Color = new Color(255, 255, 255, (byte)lightMap.Values[position.At.X, position.At.Y]);
-
-                var s = sprite.Scale;
-                s.X = (entity.Has<Monster>() ? -1 : 1) * zoom;
-                sprite.Scale = s;
-
-                svarog.render?.Draw(sprite, new RenderStates(BlendMode.Alpha));
-            });
         }
     }
 }

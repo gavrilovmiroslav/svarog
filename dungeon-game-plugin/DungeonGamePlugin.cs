@@ -4,15 +4,17 @@ using svarog;
 namespace dungeon_game_plugin
 {
     // uncomment this to make the plugin register:
-    [Plugin(Priority = 499)]
+    [Plugin(Priority = 1)]
     public class DungeonGamePlugin : Plugin
     {
         private Sprite sprite = new();
         private LevelDesign design;
+        public static event EventHandler OnLevelGenerated;
 
         public void GenerateLevel(Svarog svarog)
         {
             design = new LevelDesign(svarog);
+            OnLevelGenerated?.Invoke(this, new EventArgs());
         }
 
         public override void Load(Svarog svarog)

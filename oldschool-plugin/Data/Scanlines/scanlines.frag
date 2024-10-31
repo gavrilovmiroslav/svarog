@@ -4,7 +4,7 @@ uniform sampler2D texture;
 uniform vec2 resolution = vec2(1280.0, 800.0);
 
 uniform float scan = 1;
-uniform float darken = 0;
+uniform float darken = 1;
 
 void main()
 {
