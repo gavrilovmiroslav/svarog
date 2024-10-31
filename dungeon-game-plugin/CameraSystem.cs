@@ -92,7 +92,7 @@ namespace dungeon_game_plugin
             var glyphWindowSize = svarog.window.Size.ToFloats() / spriteSize;
             var leftTop = cameraPosition - windowCenter;
             var leftTopCoord = leftTop / spriteSize;
-            
+
             var wall = svarog.resources.GetSprite("Dirt_wall_top");
             var side = svarog.resources.GetSprite("Dirt_wall_side");
             var floor1 = svarog.resources.GetSprite("Blank_floor");
@@ -137,15 +137,21 @@ namespace dungeon_game_plugin
                     }
 
                     var l = lightMap.Values[i, j];
-                    sprite.Color = new Color(255, 255, 255, (byte)l);
-                    if (map?.Values[i, j] ?? false)
+                    var color = new Color(255, 255, 255, (byte)l);
+                    if (!light.Values[i, j])
                     {
-                        sprite.Color = Color.White;
+                        if (memory?.Values[i, j] ?? false)
+                        {
+                            sprite.Color = new Color(130, 100, 100, 255);
+                            svarog.render?.Draw(sprite, new RenderStates(BlendMode.Alpha));
+                        }
+                        continue;
                     }
+
+                    sprite.Color = color;
                     svarog.render?.Draw(sprite, new RenderStates(BlendMode.Alpha));
                 }
             }
-
         }
     }
 }

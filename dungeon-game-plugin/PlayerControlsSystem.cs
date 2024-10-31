@@ -44,6 +44,26 @@ namespace dungeon_game_plugin
             {
                 vector.X = 1;
             }
+            else if (svarog.keyboard.IsJustPressed(SFML.Window.Keyboard.Scancode.Q))
+            {
+                vector.X = -1;
+                vector.Y = -1;
+            }
+            else if (svarog.keyboard.IsJustPressed(SFML.Window.Keyboard.Scancode.E))
+            {
+                vector.X = 1;
+                vector.Y = -1;
+            }
+            else if (svarog.keyboard.IsJustPressed(SFML.Window.Keyboard.Scancode.Z))
+            {
+                vector.X = -1;
+                vector.Y = 1;
+            }
+            else if (svarog.keyboard.IsJustPressed(SFML.Window.Keyboard.Scancode.C))
+            {
+                vector.X = 1;
+                vector.Y = 1;
+            }
 
             if (vector.SqrMagnitude() > 0.0f)
             {
