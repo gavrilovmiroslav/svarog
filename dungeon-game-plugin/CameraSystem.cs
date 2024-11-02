@@ -142,7 +142,7 @@ namespace dungeon_game_plugin
                     {
                         if (memory?.Values[i, j] ?? false)
                         {
-                            sprite.Color = new Color(130, 100, 100, 255);
+                            sprite.Color = new Color(75, 50, 75, 255);
                             svarog.render?.Draw(sprite, new RenderStates(BlendMode.Alpha));
                         }
                         continue;

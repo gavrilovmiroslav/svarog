@@ -4,11 +4,13 @@ using SFML.Graphics;
 using SFML.System;
 using svarog;
 using svarog.Algorithms;
+using svarog.Effects;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 
 namespace dungeon_game_plugin
 {
@@ -19,8 +21,18 @@ namespace dungeon_game_plugin
         private Sprite sprite = new();
         private float t;
 
-        public override void Load(Svarog svarog)
+        protected Shader? grayscaleShader;
+        
+        public override void Load(Svarog instance)
         {
+            var shader = ShaderUtility.LoadFromName("grayscale");
+            if (shader == null)
+            {
+                Stop();
+                return;
+            }
+
+            grayscaleShader = shader;
             roguesImagesPositionQuery = new QueryDescription().WithAll<RoguesImage, Position>();
         }
 
@@ -50,14 +62,35 @@ namespace dungeon_game_plugin
 
                 sprite.Texture = t.Texture;
                 sprite.TextureRect = t.Coords;
-
-                sprite.Color = new Color(255, 255, 255, (byte)lightMap.Values[(int)position.At.X, (int)position.At.Y]);
+                bool useGrayscale = false;
+                var alpha = (byte)lightMap.Values[(int)position.At.X, (int)position.At.Y];
+                sprite.Color = new Color(255, 255, 255, alpha);
+                if (alpha == 0)
+                {
+                    useGrayscale = true;
+                    if (entity.Has<LastKnownPosition>() && entity.Get<LastKnownPosition>().At.HasValue)
+                    {
+                        var lkp = entity.Get<LastKnownPosition>().At.Value;
+                        p = sprite.Position;
+                        p.X = cameraOffset.X + (lkp.X + 0.5f) * spriteSize;
+                        p.Y = cameraOffset.Y + lkp.Y * spriteSize + 3 * (spriteSize / 4);
+                        sprite.Position = p;
+                        sprite.Color = new Color(75, 70, 70, 70);
+                    }
+                } 
+                else
+                {
+                    if (entity.Has<LastKnownPosition>())
+                    {
+                        entity.Get<LastKnownPosition>().At = position.At;
+                    }
+                }
 
                 var s = sprite.Scale;
                 s.X = (entity.Has<Monster>() ? -1 : 1) * zoom;
                 sprite.Scale = s;
 
-                svarog.render?.Draw(sprite, new RenderStates(BlendMode.Alpha));
+                svarog.render?.Draw(sprite, useGrayscale ? new RenderStates(grayscaleShader) : new RenderStates(BlendMode.Alpha));
             });
         }
     }

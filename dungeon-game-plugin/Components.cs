@@ -20,4 +20,5 @@ namespace dungeon_game_plugin
     public record struct RoguesImage(string Image);
     public record struct LerpPosition(Vector2f Source, Vector2f Target, float Time);
     public record struct LerpColor(Color Source, Color Target, float Time);
+    public record struct LastKnownPosition(Vector2f? At);
 }

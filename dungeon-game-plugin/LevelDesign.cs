@@ -86,17 +86,20 @@ namespace dungeon_game_plugin
             svarog.world.Create(
                 new Monster(),
                 new Position(new Vector2f(bx - 2, by - 2)),
-                new RoguesImage("Goblin_archer"));
+                new RoguesImage("Goblin_archer"),
+                new LastKnownPosition(null));
 
             svarog.world.Create(
                 new Monster(),
                 new Position(new Vector2f(bx - 3, by - 1)),
-                new RoguesImage("Goblin_mage"));
+                new RoguesImage("Goblin_mage"),
+                new LastKnownPosition(null));
 
             svarog.world.Create(
                 new Monster(),
                 new Position(new Vector2f(bx - 5, by - 5)),
-                new RoguesImage("Orc_warchief"));
+                new RoguesImage("Orc_warchief"),
+                new LastKnownPosition(null));
         }
 
         public void DebugRender(Svarog svarog)
