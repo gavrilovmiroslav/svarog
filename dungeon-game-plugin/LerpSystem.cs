@@ -1,11 +1,7 @@
 ﻿using Arch.Core;
 using Arch.Core.Extensions;
-using FloodSpill;
-using MathNet.Numerics.Statistics.Mcmc;
-using SFML.System;
 using svarog;
 using svarog.Algorithms;
-using svarog.Structures;
 
 namespace dungeon_game_plugin
 {
@@ -15,17 +11,14 @@ namespace dungeon_game_plugin
         enum ELerpKind
         {
             Position,
-            Color,
         }
 
         record struct LerpInstance(Entity Entity, ELerpKind Kind);
         
         QueryDescription lerpPositionQuery;
-        QueryDescription lerpColorQuery;
 
         Dictionary<LerpInstance, float> times = [];
         Dictionary<Entity, List<LerpPosition>> positionContinuations = [];
-        Dictionary<Entity, List<LerpColor>> colorContinuations = [];
 
         private static LerpSystem Instance;
 
@@ -47,23 +40,9 @@ namespace dungeon_game_plugin
             }
         }
 
-        public static void Add(Entity entity, LerpColor dp)
-        {
-            if (Instance.colorContinuations.TryGetValue(entity, out List<LerpColor>? value))
-            {
-                value.Add(dp);
-            }
-            else
-            {
-                Instance.colorContinuations[entity] = new List<LerpColor>([dp]);
-                Instance.times[new LerpInstance(entity, ELerpKind.Color)] = 0.0f;
-            }
-        }
-
         public override void Load(Svarog svarog)
         {
             lerpPositionQuery = new QueryDescription().WithAll<Position>();
-            lerpColorQuery = new QueryDescription().WithAll<Tint>();
         }
 
         public override void Frame(Svarog svarog)
@@ -92,6 +71,7 @@ namespace dungeon_game_plugin
                                     var dv = next.Target - next.Source;
                                     next.Source = lerp.Target;
                                     next.Target = next.Source + dv;
+                                    next.Time *= 0.5f;
                                     lerps[0] = next;
                                 }
                             }

@@ -27,7 +27,14 @@ namespace svarog.Algorithms
 
         public static Vector2f Cubic(Vector2f x, Vector2f y, float t)
         {
-            return x + (y - x) * t * t * t;
+            float ct(float t)
+            {
+                float c1 = 1.70158f;
+                float c3 = c1 + 1;
+                return c3 * t * t * t - c1 * t * t;
+            }
+
+            return x + (y - x) * ct(t);
         }
 
         public static Color Linear(Color c1, Color c2, float t)

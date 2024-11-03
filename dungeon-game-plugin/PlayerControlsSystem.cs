@@ -1,5 +1,7 @@
 ﻿using Arch.Core;
+using Arch.Core.Extensions;
 using SFML.System;
+using Stateless.Graph;
 using svarog;
 using svarog.Algorithms;
 
@@ -13,7 +15,7 @@ namespace dungeon_game_plugin
 
         public override void Register(Svarog svarog)
         {
-            playerPositionQuery = new QueryDescription().WithAll<Player, Position>();
+            playerPositionQuery = new QueryDescription().WithAll<Player, Position, Orientation>();
         }
 
         public override void Load(Svarog svarog)
@@ -67,13 +69,20 @@ namespace dungeon_game_plugin
 
             if (vector.SqrMagnitude() > 0.0f)
             {
-                svarog.world.Query(in playerPositionQuery, (Entity entity, ref Player player, ref Position position) =>
+                var justLook = svarog.keyboard.IsDown(SFML.Window.Keyboard.Scancode.LShift);
+                svarog.world.Query(in playerPositionQuery, (Entity entity, ref Player player, ref Position position, ref Orientation orientation) =>
                 {
-                    var p = position.At + vector;
-                    if (!floorPlan.Values[(int)p.X, (int)p.Y])
+                    if (!justLook)
                     {
-                        LerpSystem.Add(entity, new LerpPosition() { Source = position.At, Target = position.At + vector, Time = 0.15f });
+                        var p = position.At + vector;
+                        if (!floorPlan.Values[(int)p.X, (int)p.Y])
+                        {
+                            LerpSystem.Add(entity, new LerpPosition() { Source = position.At, Target = position.At + vector, Time = 0.25f });
+                        }
                     }
+
+                    orientation.Set(vector);
+                    player.Focus.Get<Position>().At = position.At + orientation.To * entity.Get<Sight>().Range * (justLook ? 1 : 0.5f);
                 });
             }
         }

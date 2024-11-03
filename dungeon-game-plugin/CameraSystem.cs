@@ -1,6 +1,7 @@
 ﻿using Arch.Core;
 using Arch.Core.Extensions;
 using FloodSpill;
+using MathNet.Numerics.RootFinding;
 using SFML.Graphics;
 using SFML.System;
 using svarog;
@@ -29,7 +30,7 @@ namespace dungeon_game_plugin
         public CameraSystem()
         {
             cameraTargetQuery = new QueryDescription().WithAll<CameraTarget, Position>();
-            playerSightQuery = new QueryDescription().WithAll<Player, Sight>();
+            playerSightQuery = new QueryDescription().WithAll<Player, Sight, Position, Orientation>();
         }
 
         public override void Load(Svarog svarog)
@@ -76,82 +77,82 @@ namespace dungeon_game_plugin
             sprite.Scale = s;
 
             light = light.Clear();
-            svarog.world.Query(in playerSightQuery, (Entity entity, ref Player player, ref Sight sight) =>
+            svarog.world.Query(in playerSightQuery, (Entity entity, ref Player player, ref Sight sight, ref Orientation orientation, ref Position position) =>
             {
                 if (sight.LastFov != null)
                 {
                     light = light.InplaceCombine(sight.LastFov);
                 }
-            });
-            var lightMap = light.ToIntMap(p => p ? 255 : 0).Blur().Filter(light);
-            svarog.resources.Bag<IntMap>("lightmap", lightMap);
 
-            var spriteSize = 32 * zoom;
-            var map = svarog.resources.GetFromBag<BoolMap>("dungeon: has floor");
-            var windowCenter = svarog.window.Size.ToFloats() / 2;
-            var glyphWindowSize = svarog.window.Size.ToFloats() / spriteSize;
-            var leftTop = cameraPosition - windowCenter;
-            var leftTopCoord = leftTop / spriteSize;
+                var lightMap = svarog.resources.GetFromBag<IntMap>("lightmap");
+                if (lightMap == null) return;
+                var spriteSize = 32 * zoom;
+                var map = svarog.resources.GetFromBag<BoolMap>("dungeon: has floor");
+                var windowCenter = svarog.window.Size.ToFloats() / 2;
+                var glyphWindowSize = svarog.window.Size.ToFloats() / spriteSize;
+                var leftTop = cameraPosition - windowCenter;
+                var leftTopCoord = leftTop / spriteSize;
 
-            var wall = svarog.resources.GetSprite("Dirt_wall_top");
-            var side = svarog.resources.GetSprite("Dirt_wall_side");
-            var floor1 = svarog.resources.GetSprite("Blank_floor");
-            var floor2 = svarog.resources.GetSprite("Blank_floor_dark_purple");
+                var wall = svarog.resources.GetSprite("Dirt_wall_top");
+                var side = svarog.resources.GetSprite("Dirt_wall_side");
+                var floor1 = svarog.resources.GetSprite("Blank_floor");
+                var floor2 = svarog.resources.GetSprite("Blank_floor_dark_purple");
 
-            sprite.Texture = wall.Texture;
-            int c = 0;
-            for (int i = 0; i < map.Width; i++)
-            {
-                c++;
-                for (int j = 0; j < map.Height; j++)
+                sprite.Texture = wall.Texture;
+                int c = 0;
+                for (int i = 0; i < map.Width; i++)
                 {
                     c++;
-
-                    var p = sprite.Position;
-                    p.X = windowCenter.X - cameraPosition.X + i * spriteSize;
-                    p.Y = windowCenter.Y - cameraPosition.Y + j * spriteSize;
-
-                    if (p.X + 2 * spriteSize < 0 || p.Y + 2 * spriteSize < 0) continue;
-                    if (p.X - 2 * spriteSize >= svarog.window.Size.X || p.Y - 2 * spriteSize >= svarog.window.Size.Y) continue;
-                    sprite.Position = p;
-
-                    if (i < 0) continue;
-                    if (j < 0) continue;
-                    if (i >= (int)glyphSize.X) continue;
-                    if (j >= (int)glyphSize.Y) continue;
-
-                    if (map?.Values[i, j] ?? false)
+                    for (int j = 0; j < map.Height; j++)
                     {
-                        if (j < 100 - 1 && (!map?.Values[i, j + 1] ?? false))
+                        c++;
+
+                        var p = sprite.Position;
+                        p.X = windowCenter.X - cameraPosition.X + i * spriteSize;
+                        p.Y = windowCenter.Y - cameraPosition.Y + j * spriteSize;
+
+                        if (p.X + 2 * spriteSize < 0 || p.Y + 2 * spriteSize < 0) continue;
+                        if (p.X - 2 * spriteSize >= svarog.window.Size.X || p.Y - 2 * spriteSize >= svarog.window.Size.Y) continue;
+                        sprite.Position = p;
+
+                        if (i < 0) continue;
+                        if (j < 0) continue;
+                        if (i >= (int)glyphSize.X) continue;
+                        if (j >= (int)glyphSize.Y) continue;
+
+                        if (map?.Values[i, j] ?? false)
                         {
-                            sprite.TextureRect = side.Coords;
+                            if (j < 100 - 1 && (!map?.Values[i, j + 1] ?? false))
+                            {
+                                sprite.TextureRect = side.Coords;
+                            }
+                            else
+                            {
+                                sprite.TextureRect = wall.Coords;
+                            }
                         }
                         else
                         {
-                            sprite.TextureRect = wall.Coords;
+                            sprite.TextureRect = (c % 2 == 0) ? floor1.Coords : floor2.Coords;
                         }
-                    }
-                    else
-                    {
-                        sprite.TextureRect = (c % 2 == 0) ? floor1.Coords : floor2.Coords;
-                    }
 
-                    var l = lightMap.Values[i, j];
-                    var color = new Color(255, 255, 255, (byte)l);
-                    if (!light.Values[i, j])
-                    {
-                        if (memory?.Values[i, j] ?? false)
+                        var l = lightMap.Values[i, j];
+                        var color = new Color(255, 255, 255, (byte)l);
+                        if (!light.Values[i, j])
                         {
-                            sprite.Color = new Color(75, 50, 75, 255);
-                            svarog.render?.Draw(sprite, new RenderStates(BlendMode.Alpha));
+                            if (memory?.Values[i, j] ?? false)
+                            {
+                                sprite.Color = new Color(25, 25, 25, 255);
+                                svarog.render?.Draw(sprite, GrayscaleShaderPlugin.Grayscale);
+                            }
+                            continue;
                         }
-                        continue;
-                    }
 
-                    sprite.Color = color;
-                    svarog.render?.Draw(sprite, new RenderStates(BlendMode.Alpha));
+                        sprite.Color = color;
+                        svarog.render?.Draw(sprite, new RenderStates(BlendMode.Alpha));
+                    }
                 }
-            }
+            });
         }
     }
 }

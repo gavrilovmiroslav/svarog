@@ -5,12 +5,6 @@ using SFML.System;
 using svarog;
 using svarog.Algorithms;
 using svarog.Effects;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Xml.Linq;
 
 namespace dungeon_game_plugin
 {
@@ -18,39 +12,28 @@ namespace dungeon_game_plugin
     public class InWorldRendererSystem : Plugin
     {
         QueryDescription roguesImagesPositionQuery;
-        private Sprite sprite = new();
-        private float t;
-
-        protected Shader? grayscaleShader;
+        private readonly Sprite sprite = new();
+        private RenderStates alphaRenderState;
+        private float time;
         
         public override void Load(Svarog instance)
         {
-            var shader = ShaderUtility.LoadFromName("grayscale");
-            if (shader == null)
-            {
-                Stop();
-                return;
-            }
-
-            grayscaleShader = shader;
-            roguesImagesPositionQuery = new QueryDescription().WithAll<RoguesImage, Position>();
+            roguesImagesPositionQuery = new QueryDescription().WithAll<RoguesImage, Position, Orientation>();
+            alphaRenderState = new RenderStates(BlendMode.Alpha);
         }
 
         public override void Render(Svarog svarog)
         {
-            t += 0.1f;
+            time += svarog.clock.ElapsedTime.AsMilliseconds() * 0.01f;
             var lightMap = svarog.resources.GetFromBag<IntMap>("lightmap");
+            if (lightMap == null) return;
+
             var cameraOffset = svarog.resources.GetFromBag<Vector2f>("camera offset");
             var zoom = svarog.resources.GetFromBag<float>("camera zoom");
             var spriteSize = 32 * zoom;
-            var dy = MathF.Sin(t) * 0.05f;
-
-            var s = sprite.Scale;
-            s.X = zoom;
-            s.Y = zoom + dy;
-            sprite.Scale = s;
-
-            svarog.world.Query(in roguesImagesPositionQuery, (Entity entity, ref RoguesImage image, ref Position position) =>
+            var dy = MathF.Sin(time) * 0.05f;
+            
+            svarog.world.Query(in roguesImagesPositionQuery, (Entity entity, ref RoguesImage image, ref Position position, ref Orientation orientation) =>
             {
                 var t = svarog.resources.GetSprite(image.Image);
 
@@ -65,6 +48,12 @@ namespace dungeon_game_plugin
                 bool useGrayscale = false;
                 var alpha = (byte)lightMap.Values[(int)position.At.X, (int)position.At.Y];
                 sprite.Color = new Color(255, 255, 255, alpha);
+
+                var s = sprite.Scale;
+                s.X = -orientation.Side * zoom;
+                s.Y = zoom + dy * (alpha == 0 ? 0 : 1);
+                sprite.Scale = s;
+
                 if (alpha == 0)
                 {
                     useGrayscale = true;
@@ -75,7 +64,7 @@ namespace dungeon_game_plugin
                         p.X = cameraOffset.X + (lkp.X + 0.5f) * spriteSize;
                         p.Y = cameraOffset.Y + lkp.Y * spriteSize + 3 * (spriteSize / 4);
                         sprite.Position = p;
-                        sprite.Color = new Color(75, 70, 70, 70);
+                        sprite.Color = new Color(45, 40, 40, 255);
                     }
                 } 
                 else
@@ -86,11 +75,7 @@ namespace dungeon_game_plugin
                     }
                 }
 
-                var s = sprite.Scale;
-                s.X = (entity.Has<Monster>() ? -1 : 1) * zoom;
-                sprite.Scale = s;
-
-                svarog.render?.Draw(sprite, useGrayscale ? new RenderStates(grayscaleShader) : new RenderStates(BlendMode.Alpha));
+                svarog.render?.Draw(sprite, useGrayscale ? GrayscaleShaderPlugin.Grayscale : alphaRenderState);
             });
         }
     }

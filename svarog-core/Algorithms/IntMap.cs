@@ -48,7 +48,35 @@ namespace svarog.Algorithms
             return map;
         }
 
-        public IntMap Filter(BoolMap map)
+        public IntMap Filter(Func<int, int, int, int> filter)
+        {
+            var map = new IntMap(Width, Height);
+
+            for (int i = 0; i < Width; i++)
+            {
+                for (int j = 0; j < Height; j++)
+                {
+                    map.Values[i, j] = filter(i, j, Values[i, j]);
+                }
+            }
+
+            return map;
+        }
+
+        public IntMap FilterInplace(Func<int, int, int, int> filter)
+        {
+            for (int i = 0; i < Width; i++)
+            {
+                for (int j = 0; j < Height; j++)
+                {
+                    Values[i, j] = filter(i, j, Values[i, j]);
+                }
+            }
+
+            return this;
+        }
+
+        public IntMap FilterByBoolPredicate(BoolMap map)
         {
             Debug.Assert(Width == map.Width && Height == map.Height);
             var newMap = new IntMap(Width, Height);

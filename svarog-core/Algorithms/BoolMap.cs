@@ -157,6 +157,34 @@ namespace svarog.Algorithms
             return this;
         }
 
+        public BoolMap Filter(Func<int, int, bool, bool> filter)
+        {
+            var map = new BoolMap(Width, Height);
+
+            for (int i = 0; i < Width; i++)
+            {
+                for (int j = 0; j < Height; j++)
+                {
+                    map.Values[i, j] = filter(i, j, Values[i, j]);
+                }
+            }
+
+            return map;
+        }
+
+        public BoolMap FilterInplace(Func<int, int, bool, bool> filter)
+        {
+            for (int i = 0; i < Width; i++)
+            {
+                for (int j = 0; j < Height; j++)
+                {
+                    Values[i, j] = filter(i, j, Values[i, j]);
+                }
+            }
+
+            return this;
+        }
+
         public BoolMap Combine(BoolMap map)
         {
             var newMap = new BoolMap(Width, Height);

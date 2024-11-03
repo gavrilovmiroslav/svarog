@@ -32,8 +32,7 @@ namespace dungeon_game_plugin
             svarog.world.Clear();
             var size = svarog.resources.Bag("glyphSize", new Vector2i(160, 100));
 
-            svarog.Invoke(
-                "generate level (subdiv)",
+            svarog.Invoke("generate level (subdiv)",
                 ("name", "dungeon"),
                 ("map size", size.AsTuple()),
                 ("door %", 99));
@@ -76,9 +75,13 @@ namespace dungeon_game_plugin
 
             Debug.Assert(bestRoom != null);
             var (bx, by) = ParseLabel(bestRoom.Value.GetLabel());
+
+            var focus = svarog.world.Create(new PlayerFocus(), new Position(new Vector2f(bx, by)), new CameraTarget(1.0f));
+
             svarog.world.Create(
-                new Player(), 
+                new Player(focus), 
                 new Position(new Vector2f(bx, by)), 
+                Orientation.Left,
                 new CameraTarget(1.0f), 
                 new Sight(10, null, null), 
                 new RoguesImage("Rogue"));
@@ -86,18 +89,21 @@ namespace dungeon_game_plugin
             svarog.world.Create(
                 new Monster(),
                 new Position(new Vector2f(bx - 2, by - 2)),
+                Orientation.Right,
                 new RoguesImage("Goblin_archer"),
                 new LastKnownPosition(null));
 
             svarog.world.Create(
                 new Monster(),
                 new Position(new Vector2f(bx - 3, by - 1)),
+                Orientation.Right,
                 new RoguesImage("Goblin_mage"),
                 new LastKnownPosition(null));
 
             svarog.world.Create(
                 new Monster(),
                 new Position(new Vector2f(bx - 5, by - 5)),
+                Orientation.Right,
                 new RoguesImage("Orc_warchief"),
                 new LastKnownPosition(null));
         }
