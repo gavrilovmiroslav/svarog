@@ -4,6 +4,12 @@ namespace svarog.Algorithms
 {
     public static class VectorExtensions
     {
+        public static Vector2f Normalized(this Vector2f v)
+        {
+            var l = MathF.Sqrt(v.SqrMagnitude());
+            return v / l;
+        }
+
         public static Vector2f Abs(this Vector2f v)
         {
             return new Vector2f(MathF.Abs(v.X), MathF.Abs(v.Y));

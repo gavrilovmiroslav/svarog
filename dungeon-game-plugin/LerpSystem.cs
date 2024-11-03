@@ -58,7 +58,7 @@ namespace dungeon_game_plugin
                     {
                         t += svarog.clock.ElapsedTime.AsSeconds();
                         var dl = Math.Clamp(t / lerp.Time, 0.0f, 1.0f);
-                        entity.Get<Position>().At = Lerp.Linear(lerp.Source, lerp.Target, dl);
+                        entity.Get<Position>().At = Lerp.Cubic(lerp.Source, lerp.Target, dl);
 
                         if (dl >= 1.0f)
                         {

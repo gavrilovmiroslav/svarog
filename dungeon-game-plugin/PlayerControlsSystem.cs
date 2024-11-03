@@ -82,7 +82,7 @@ namespace dungeon_game_plugin
                     }
 
                     orientation.Set(vector);
-                    player.Focus.Get<Position>().At = position.At + orientation.To * entity.Get<Sight>().Range * (justLook ? 1 : 0.5f);
+                    player.Focus.Get<Position>().At = position.At + orientation.To.Normalized() * entity.Get<Sight>().Range * (justLook ? 1 : 0.5f);
                 });
             }
         }
