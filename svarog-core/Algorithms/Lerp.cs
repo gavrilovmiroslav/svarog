@@ -1,15 +1,36 @@
 ﻿using SFML.Graphics;
 using SFML.System;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace svarog.Algorithms
 {
+    public enum ELerp
+    {
+        Linear,
+        Cubic,
+    }
+
     public static class Lerp
     {
+        public static float Float(float x, float y, float t, ELerp kind)
+        {
+            return kind switch
+            {
+                ELerp.Linear => Linear(x, y, t),
+                ELerp.Cubic => Cubic(x, y, t),
+                _ => throw new NotImplementedException(),
+            };
+        }
+
+        public static Vector2f Vec2(Vector2f x, Vector2f y, float t, ELerp kind)
+        {
+            return kind switch
+            {
+                ELerp.Linear => Linear(x, y, t),
+                ELerp.Cubic => Cubic(x, y, t),
+                _ => throw new NotImplementedException(),
+            };
+        }
+
         public static float Linear(float x, float y, float t)
         {
             return x + (y - x) * t;

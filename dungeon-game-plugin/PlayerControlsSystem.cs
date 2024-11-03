@@ -82,7 +82,13 @@ namespace dungeon_game_plugin
                     }
 
                     orientation.Set(vector);
-                    player.Focus.Get<Position>().At = position.At + orientation.To.Normalized() * entity.Get<Sight>().Range * (justLook ? 1 : 0.5f);
+
+                    var focus = player.Focus;
+                    var focusPosition = focus.Get<Position>().At;
+                    LerpSystem.Add(player.Focus, new LerpPosition() { 
+                        Source = focusPosition, 
+                        Target = position.At + orientation.To.Normalized() * entity.Get<Sight>().Range * (justLook ? 1 : 0.5f), Time = 0.35f })
+                    ;
                 });
             }
         }
